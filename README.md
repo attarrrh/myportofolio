@@ -1,4 +1,4 @@
-Nama : Attar
+Nama : Attar Rais
 
 NPM : 2506656495
 
