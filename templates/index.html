@@ -1,61 +1,172 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attar - Portfolio</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attar — Portfolio</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <header class="site-header">
-        <div class="container">
-            <a href="#profile" class="brand">Attar</a>
-            <nav>
-                <a href="#profile">Profile</a>
-            </nav>
-        </div>
-    </header>
 
-    <main>
-        <section class="hero" id="profile">
-            <div class="container hero-grid">
-                <div class="hero-identity">
-                    <p class="hero-kicker">Computer Science &middot; Universitas Indonesia</p>
-                    <h1>Attar</h1>
-                </div>
-                <div class="hero-photo">
-                    <div class="photo-block"></div>
-                    <img class="avatar" src="/static/img/attar.jpg" alt="Photo of Attar">
-                </div>
-                <div class="hero-details">
-                    <p class="bio">CS student at Universitas Indonesia for longer than planned, now a familiar (and slightly dreaded) face among Fasilkom students as a teaching assistant across several courses.</p>
-                    <dl class="meta-list">
-                        <div class="meta-row">
-                            <dt>NPM</dt>
-                            <dd>2506656495</dd>
-                        </div>
-                        <div class="meta-row">
-                            <dt>Program</dt>
-                            <dd>S1 Sistem Informasi</dd>
-                        </div>
-                    </dl>
-                    <div class="social-links">
-                        <a href="https://github.com/attarrrh" class="social-link">GitHub</a>
-                        <a href="https://www.linkedin.com/in/attar-rais-hakam-b53759339/" class="social-link">LinkedIn</a>
-                        <a href="mailto:attarrrh@gmail.com" class="social-link">Email</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+  <!-- ============ TOMBOL GANTI TEMA ============ -->
+  <div class="theme-widget" id="themeWidget">
+    <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Ganti warna tema" title="Ganti warna tema">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/>
+        <circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/>
+        <path d="M12 2a10 10 0 1 0 5.66 18.24c.9-.63.34-2.05-.75-1.94a3.5 3.5 0 0 1-.41-6.98 1.5 1.5 0 0 0 1.36-2.1A10 10 0 0 0 12 2Z"/>
+      </svg>
+    </button>
+    <div class="theme-panel" id="themePanel">
+      <button class="swatch" data-theme="cobalt" style="--sw:#1E56F6" title="Cobalt"></button>
+      <button class="swatch" data-theme="forest" style="--sw:#1B4332" title="Forest"></button>
+      <button class="swatch" data-theme="wine" style="--sw:#3D0B24" title="Wine"></button>
+      <button class="swatch" data-theme="ecru" style="--sw:#F1ECDE" title="Ecru"></button>
+      <button class="swatch" data-theme="ink" style="--sw:#121212" title="Ink"></button>
+      <button class="swatch" data-theme="paper" style="--sw:#FFFFFF" title="Paper"></button>
+    </div>
+  </div>
 
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 Attar. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+  <!-- ============ NAV ============ -->
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a href="#top" class="logo">AT.</a>
+      <nav class="main-nav">
+        <a href="#profile">Profile</a>
+        <a href="#skills">Skill</a>
+        <a href="#experience">Pengalaman</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============ HERO / PROFILE ============ -->
+  <section id="top" class="hero">
+    <div class="wrap hero-grid" id="profile">
+
+      <div class="hero-copy">
+        <p class="eyebrow">Computer Science &middot; Universitas Indonesia</p>
+        <h1 class="hero-name">ATTAR</h1>
+        <p class="hero-bio">
+          CS student at Universitas Indonesia for longer than planned, now a
+          familiar (and slightly dreaded) face among Fasilkom students as a
+          teaching assistant across several courses.
+        </p>
+
+        <dl class="meta-list">
+          <div class="meta-row">
+            <dt>NPM</dt>
+            <dd>2506656495</dd>
+          </div>
+          <div class="meta-row">
+            <dt>Program</dt>
+            <dd>S1 Sistem Informasi</dd>
+          </div>
+        </dl>
+
+        <div class="hero-cta">
+          <a href="https://github.com/attarrrh" class="btn-primary" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://www.linkedin.com/in/attar-rais-hakam-b53759339/" class="btn-ghost" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="mailto:attarrrh@gmail.com" class="btn-ghost">Email</a>
         </div>
-    </footer>
+      </div>
+
+      <div class="hero-photo">
+        <div class="photo-stack">
+          <div class="photo-card card-back"></div>
+          <div class="photo-card card-front">
+            <img src="/static/img/attar.jpg" alt="Foto Attar">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ SKILLS ============ -->
+  <section id="skills" class="skills">
+    <div class="wrap">
+      <h2 class="section-title">SKILL</h2>
+      <p class="section-sub">Bahasa, tools, dan hal lain yang aku kuasai</p>
+
+      <div class="skills-grid">
+
+        <div class="skill-group">
+          <h3>Bahasa &amp; Framework</h3>
+          <ul class="skill-list">
+            <li><span>Python</span><div class="bar"><span style="width:90%"></span></div></li>
+            <li><span>Java</span><div class="bar"><span style="width:80%"></span></div></li>
+            <li><span>JavaScript</span><div class="bar"><span style="width:75%"></span></div></li>
+            <li><span>Django</span><div class="bar"><span style="width:70%"></span></div></li>
+          </ul>
+        </div>
+
+        <div class="skill-group">
+          <h3>Data &amp; Tools</h3>
+          <ul class="skill-list">
+            <li><span>SQL</span><div class="bar"><span style="width:78%"></span></div></li>
+            <li><span>Git &amp; GitHub</span><div class="bar"><span style="width:85%"></span></div></li>
+            <li><span>Linux</span><div class="bar"><span style="width:65%"></span></div></li>
+            <li><span>Figma</span><div class="bar"><span style="width:55%"></span></div></li>
+          </ul>
+        </div>
+
+        <div class="skill-group">
+          <h3>Lainnya</h3>
+          <ul class="skill-list">
+            <li><span>Public Speaking</span><div class="bar"><span style="width:80%"></span></div></li>
+            <li><span>Teaching</span><div class="bar"><span style="width:88%"></span></div></li>
+            <li><span>Project Management</span><div class="bar"><span style="width:68%"></span></div></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EXPERIENCE ============ -->
+  <section id="experience" class="experience">
+    <div class="wrap">
+      <h2 class="section-title">PENGALAMAN</h2>
+      <p class="section-sub">Perjalanan kerja dan organisasi sejauh ini</p>
+
+      <ol class="timeline">
+        <li class="timeline-item">
+          <div class="timeline-date">2025 — Sekarang</div>
+          <div class="timeline-body">
+            <h3>Teaching Assistant <span>— Fasilkom UI</span></h3>
+            <p>Membantu mengajar dan mendampingi praktikum untuk beberapa mata kuliah di Fakultas Ilmu Komputer Universitas Indonesia.</p>
+          </div>
+        </li>
+        <li class="timeline-item">
+          <div class="timeline-date">Tahun — Tahun</div>
+          <div class="timeline-body">
+            <h3>Nama Peran <span>— Nama Organisasi/Perusahaan</span></h3>
+            <p>Ganti dengan deskripsi singkat tanggung jawab dan pencapaian kamu di posisi ini.</p>
+          </div>
+        </li>
+        <li class="timeline-item">
+          <div class="timeline-date">Tahun — Tahun</div>
+          <div class="timeline-body">
+            <h3>Nama Peran <span>— Nama Organisasi/Perusahaan</span></h3>
+            <p>Ganti dengan deskripsi singkat tanggung jawab dan pencapaian kamu di posisi ini.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>&copy; 2026 Attar. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+    </div>
+  </footer>
+
+  <script src="/static/js/theme-switcher.js"></script>
 </body>
 </html>
