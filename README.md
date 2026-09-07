@@ -12,3 +12,6 @@ batasan yang aku rasakan ada pada bagian edit manual hampir semuanya mulai dari 
 
 Attar Rais Hakam
 2506656495
+
+AI
+menggunakan skill web artefact yang ada di claude dengan pendekatan referensif mencari inspirasi sebagai bahan referensi kemudian minta saran dan adjusment terhadap web template awal yang diberikan, kemudian eksplorasi berdasarkan konsep yang ada internet dan referensi lain, menambahkan fitur, menambahkan animasi, menambahkan hal hasil eksplorasi, editing dan cleaning, refactor beberapa kesalahan ataupun hal yang dirsa kurang, finishing dan meminta feedback evaluasi dan masukan terkait apa yang bisa di tambahkan kedepannya
