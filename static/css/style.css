@@ -260,6 +260,48 @@ a{ color:inherit; text-decoration:none; }
 .timeline-points li{ opacity:.9; font-size:14px; }
 
 
+/* ---- Hover reveal: gambar + deskripsi muncul saat judul di-hover/fokus ---- */
+.timeline-title{
+  cursor: pointer;
+  display: inline-block;
+  border-bottom: 1px dashed transparent;
+}
+.timeline-title:hover,
+.timeline-title:focus-visible{
+  border-bottom-color: var(--accent);
+  outline: none;
+}
+.timeline-reveal{
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows .35s ease;
+}
+.timeline-title:hover + .timeline-reveal,
+.timeline-title:focus-visible + .timeline-reveal{
+  grid-template-rows: 1fr;
+}
+.reveal-inner{
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.timeline-title:hover + .timeline-reveal .reveal-inner,
+.timeline-title:focus-visible + .timeline-reveal .reveal-inner{
+  opacity: 1;
+  transition: opacity .3s ease .1s;
+}
+.reveal-inner > *:first-child{ margin-top: 14px; }
+.timeline-img{
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: 16/10;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--paper);
+  box-shadow: 0 14px 30px rgba(0,0,0,.3);
+  margin-bottom: 12px;
+  display: block;
+}
 
 /* ==========================================================
    FOOTER
