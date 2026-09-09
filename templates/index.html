@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Attar — Portfolio</title>
+<title>{{ name }} — Portfolio</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,11 +35,10 @@
   <!-- ============ NAV ============ -->
   <header class="site-header">
     <div class="wrap header-inner">
-      <a href="#profile" class="logo">ATT.</a>
+      <a href="{% url 'main:show_main' %}" class="logo">AT.</a>
       <nav class="main-nav">
-        <a href="#profile">Profile</a>
-        <a href="#skills">Skill</a>
-        <a href="#experience">Experience</a>
+    <a href="{% url 'main:show_main' %}">Profile</a>
+    <a href="{% url 'main:show_experience' %}">Experience</a>
       </nav>
     </div>
   </header>
@@ -54,14 +53,14 @@
         <a href="https://github.com/attarrrh" class="btn-primary" target="_blank" rel="noopener">GitHub</a>
       </div>
 
-      <h1 class="hero-name">ATTAR RAIS HAKAM</h1>
+      <h1 class="hero-name">{{ full_name }}</h1>
       <p class="hero-role">Computer Science &middot; Universitas Indonesia</p>
 
       <div class="hero-photo">
         <div class="photo-stack">
           <div class="photo-card card-back"></div>
           <div class="photo-card card-front">
-            <img src="/static/img/attar.jpg" alt="Foto Attar">
+            <img src="/static/img/attar.jpg" alt="Photo of {{ name }}">
           </div>
         </div>
       </div>
@@ -71,11 +70,11 @@
       <dl class="meta-list">
         <div class="meta-row">
           <dt>NPM</dt>
-          <dd>2506656495</dd>
+          <dd>{{ npm }}</dd>
         </div>
         <div class="meta-row">
           <dt>Program</dt>
-          <dd>Bachelor of Information System</dd>
+          <dd>{{ study_program }}</dd>
         </div>
       </dl>
 
@@ -136,7 +135,7 @@
     </div>
   </section>
 
-  <!-- ============ EXPERIENCE ============ -->
+  <!-- ============ EXPERIENCE ============
   <section id="experience" class="experience">
     <div class="wrap">
       <h2 class="section-title">EXPERIENCE</h2>
@@ -201,7 +200,7 @@
       </ol>
     </div>
   </section>
- 
+  -->
   
   <!-- ============ FOOTER ============ -->
  
@@ -226,7 +225,7 @@
  
   <footer class="site-footer">
     <div class="wrap">
-      <p>&copy; 2026 Attar. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+      <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
     </div>
   </footer>
  
