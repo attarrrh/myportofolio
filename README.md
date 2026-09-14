@@ -21,6 +21,17 @@ menggunakan skill web artefact yang ada di claude dengan pendekatan referensif m
 #TUGAS2
 1. Jelaskan alur yang terjadi ketika pengguna membuka halaman portofolio baru, mulai dari permintaan yang diterima proyek hingga data ditampilkan pada browser. Dalam jawabanmu, jelaskan peran urls.py proyek, urls.py aplikasi, view, model, dan template.
 
+jadi browser ngirim reqnya dulu ke alamat tujuan misalnya /experience, terus lanjut django membaca dulu urls proyek yang mana dari urls itu di terusin ke path urls yang ada di main, di main lanjut lagi ke urls dia ini mengecek kecocokan path experience dengan yang ada di daftar biasanya terdapat inisiasi path seperti "path("experience/", show_experience, name="show_experience"),", django disini tau kalo path itu di tangani oleh fungsi dengan nama show_exp, fungsi ini adanya di views setelah dia dijalankan di dalamnya views manggil dan ngambil semua data dari model terkait "experience.object.all", selanjutnya data model dimasukan kedalam context, kemudian views ini manggil requwst experience.html untuk ditampilkan, next django ngebuka experience.html dan ngirim respons tersebut ke browser
+
 2. Mengapa data untuk bagian portofolio baru sebaiknya disimpan pada model dan tidak ditulis langsung di dalam template? Jelaskan dampaknya terhadap kemudahan pemeliharaan dan pengembangan aplikasi.
 
+kalau data ditulis langsung di template tidak hanya membuang tenaga untuk menulisnya di html secara manual, tetapi juga merepotkan jika setiap kali ada data baru harus mengedit file htmlnya lagi dan mencari bagiannya satu persatu, dan bagaimanajika data yang ingin di input merupakan bigdata prosesnya jadi lambat dan rawan human error sangat tidak efektif bagi pengembangan website waktu selanjutnya
+
 3. Apa perbedaan fungsi makemigrations dan migrate pada Django? Berikan contoh perubahan model yang mengharuskanmu menjalankan kedua perintah tersebut.
+makemigrations membaca perubahan yang kamu buat pada file models, lalu membuat file migrasi baru di folder main/migrations biasanya berisi instruksi perubahan, intinya disini database belum diubah sama sekali, baru dibuat semacam skemaa aja
+
+migrate menjalankan instruksi dari file migrasi tersebut ke database, disini struktur tabel di database baru mulai di ubah, misalnya membuat tabel baru atau menambah kolom
+
+
+AI
+menggunakan ai untuk membantu mengulang proses pembuatan app yang sebelumnya sudah dilakukan pada tutorial 2 untuk membuat experience kali ini bagaimana jika membuat app aboutme berisi galeri gamber pengalaman atau hobi yang sering aku lakukan, sekaligus membantu melakukan strukturisasi css serta membantu jika terjadi eror terutama pada tahap explorasi dan commiting git
