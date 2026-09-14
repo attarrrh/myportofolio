@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Experience - {{ name }}</title>
+<title>About Me - {{ name }}</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,50 +37,42 @@
     <div class="wrap header-inner">
       <a href="{% url 'main:show_main' %}" class="logo">AT.</a>
       <nav class="main-nav">
-    <a href="{% url 'main:show_main' %}">Profile</a>
-    <a href="{% url 'main:show_experience' %}">Experience</a>
-    <a href="{% url 'main:show_about' %}">About Me</a>
+        <a href="{% url 'main:show_main' %}">Profile</a>
+        <a href="{% url 'main:show_experience' %}">Experience</a>
+        <a href="{% url 'main:show_about' %}">About Me</a>
       </nav>
     </div>
   </header>
 
   <main>
 
-  <!-- ============ EXPERIENCE (dari database) ============ -->
-
-  <section id="experience" class="experience experience-page">
+  <!-- ============ ABOUT ME GALLERY (dari database) ============ -->
+  <section id="about" class="experience experience-page">
     <div class="wrap">
-      <!-- <p class="eyebrow">Perjalanan saya sejauh ini</p> -->
-      <h1 class="section-title">EXPERIENCE</h1>
-      <p class="section-sub">Activities, organizations, and jobs I have been involved in</p>
- 
-      <ol class="timeline">
-        {% for experience in experience_list %}
-        <li class="timeline-item">
-          <div class="timeline-date">
-            {{ experience.started_at|date:"M Y" }} &mdash;
-            {% if experience.is_ongoing %}Present{% else %}{{ experience.ended_at|date:"M Y" }}{% endif %}
+      <p class="eyebrow">Beyond the resume, literally</p>
+      <h1 class="section-title">ABOUT ME</h1>
+      <p class="section-sub">Foto, video, hobi, dan hal-hal lain yang aku suka</p>
+
+      <div class="gallery-grid">
+        {% for item in gallery_list %}
+        <div class="gallery-card">
+          <div class="gallery-media">
+            {% if item.media_type == "video" %}
+              <video src="{{ item.media_url }}" controls preload="metadata"></video>
+            {% else %}
+              <img src="{{ item.media_url }}" alt="{{ item.title }}" loading="lazy">
+            {% endif %}
           </div>
-          <div class="timeline-body">
-            <h3 class="timeline-title" tabindex="0">
-              {{ experience.title }}
-              <span>{{ experience.get_category_display }}</span>
-            </h3>
-            <div class="timeline-reveal"><div class="reveal-inner">
-              {% if experience.thumbnail %}
-                <img src="{{ experience.thumbnail }}" alt="{{ experience.title }}" class="timeline-img">
-              {% endif %}
-              <p class="timeline-loc">
-                {% if experience.is_ongoing %}Sedang berlangsung{% else %}Selesai{% endif %}
-              </p>
-              <p>{{ experience.description }}</p>
-            </div></div>
+          <div class="gallery-info">
+            <span class="gallery-category">{{ item.get_category_display }}</span>
+            <h3>{{ item.title }}</h3>
+            {% if item.caption %}<p>{{ item.caption }}</p>{% endif %}
           </div>
-        </li>
+        </div>
         {% empty %}
-        <p class="empty-state">Belum ada pengalaman yang ditambahkan.</p>
+        <p class="empty-state">Belum ada item galeri yang ditambahkan.</p>
         {% endfor %}
-      </ol>
+      </div>
     </div>
   </section>
 

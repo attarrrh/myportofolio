@@ -266,6 +266,88 @@ a{ color:inherit; text-decoration:none; }
 }
 .timeline-points li{ opacity:.9; font-size:14px; }
 
+
+/* ==========================================================
+   ABOUT ME GALLERY
+   ========================================================== */
+.gallery-grid{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+.gallery-card{
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--line);
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.gallery-card:hover{
+  transform: translateY(-6px);
+  box-shadow: 0 18px 34px rgba(0,0,0,.3);
+}
+.gallery-media{
+  width: 100%;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  background: var(--line);
+}
+.gallery-media img,
+.gallery-media video{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.gallery-info{ padding: 16px 18px 20px; }
+.gallery-category{
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.gallery-info h3{
+  font-family: var(--font-heading);
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+.gallery-info p{
+  font-size: 14px;
+  opacity: .85;
+}
+ 
+@media (max-width: 860px){
+  .gallery-grid{ grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px){
+  .gallery-grid{ grid-template-columns: 1fr; }
+}
+.timeline{ list-style:none; border-left:2px solid var(--line); }
+.timeline-item{ position:relative; padding: 0 0 40px 32px; }
+.timeline-item::before{
+  content:''; position:absolute; left:-7px; top:4px;
+  width:12px; height:12px; border-radius:50%; background: var(--accent);
+}
+.timeline-date{ font-size:13px; font-weight:700; opacity:.75; margin-bottom:6px; }
+.timeline-body h3{ font-family: var(--font-heading); font-size:18px; margin-bottom:8px; }
+.timeline-body h3 span{ font-weight:400; opacity:.75; display:block; margin-top:2px; }
+.timeline-body p{ max-width:60ch; opacity:.9; }
+.timeline-loc{ font-size:13px; opacity:.7; margin-bottom:10px; }
+.timeline-skills{ font-size:13px; opacity:.8; font-weight:600; }
+.timeline-points{
+  margin: 10px 0 0;
+  padding-left: 18px;
+  max-width: 60ch;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.timeline-points li{ opacity:.9; font-size:14px; }
+ 
+
 /* ---- Hover reveal: gambar + deskripsi muncul saat judul di-hover/fokus ---- */
 .timeline-title{
   cursor: pointer;
@@ -357,64 +439,11 @@ a{ color:inherit; text-decoration:none; }
 .get-to-know .section-title{ margin-bottom: 16px; }
 .get-to-know .section-sub{ opacity:.85; margin-bottom: 32px; }
 .ig-btn{ display:inline-flex; align-items:center; gap:8px; }
-
+ 
 @media (prefers-reduced-motion: reduce){
   .parallax-bg{ transform: none !important; }
 }
 
-.experience-section {
-    padding: 4rem 0;
-    border-top: 1px solid var(--line);
-}
-
-.section-kicker {
-    color: var(--accent-dark);
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.experience-section h1 {
-    margin: 0.4rem 0 1.5rem;
-    font-size: 2rem;
-}
-
-.experience-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-}
-
-.experience-card {
-    padding: 1.25rem;
-    background-color: #fff;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-}
-
-.experience-category {
-    color: var(--accent-dark);
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-.experience-card h2 {
-    margin: 0.5rem 0;
-    font-size: 1.25rem;
-}
-
-.experience-description,
-.empty-state {
-    color: var(--text-muted);
-}
-
-.experience-status {
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
 
 /* ==========================================================
    FOOTER
