@@ -1,48 +1,6 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{ name }} — Portfolio</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
-
-  <!-- ============ TOMBOL GANTI TEMA ============ -->
-  <div class="theme-widget" id="themeWidget">
-    <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Ganti warna tema" title="Ganti warna tema">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8">
-        <circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/>
-        <circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/>
-        <path d="M12 2a10 10 0 1 0 5.66 18.24c.9-.63.34-2.05-.75-1.94a3.5 3.5 0 0 1-.41-6.98 1.5 1.5 0 0 0 1.36-2.1A10 10 0 0 0 12 2Z"/>
-      </svg>
-    </button>
-    <div class="theme-panel" id="themePanel">
-      <button class="swatch" data-theme="cobalt" style="--sw:#1E56F6" title="Cobalt"></button>
-      <button class="swatch" data-theme="forest" style="--sw:#1B4332" title="Forest"></button>
-      <button class="swatch" data-theme="wine" style="--sw:#3D0B24" title="Wine"></button>
-      <button class="swatch" data-theme="ecru" style="--sw:#F1ECDE" title="Ecru"></button>
-      <button class="swatch" data-theme="ink" style="--sw:#121212" title="Ink"></button>
-      <button class="swatch" data-theme="paper" style="--sw:#FFFFFF" title="Paper"></button>
-    </div>
-  </div>
-
-  <!-- ============ NAV ============ -->
-  <header class="site-header">
-    <div class="wrap header-inner">
-      <a href="{% url 'main:show_main' %}" class="logo">AT.</a>
-      <nav class="main-nav">
-    <a href="{% url 'main:show_main' %}">Profile</a>
-    <a href="{% url 'main:show_experience' %}">Experience</a>
-    <a href="{% url 'main:show_about' %}">About Me</a>
-      </nav>
-    </div>
-  </header>
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
 
   <!-- ============ HERO / PROFILE ============ -->
   <section id="profile" class="hero">
@@ -61,7 +19,7 @@
         <div class="photo-stack">
           <div class="photo-card card-back"></div>
           <div class="photo-card card-front">
-            <img src="/static/img/attar.jpg" alt="Photo of {{ name }}">
+            <img src="{% static 'img/attar.jpg' %}" alt="Photo of {{ name }}">
           </div>
         </div>
       </div>
@@ -87,10 +45,10 @@
     <div class="wrap">
       <div class="photo-fan">
         <!-- Ganti 4 src ini dengan foto kamu -->
-        <img class="fan-img fan-1" src="/static/img/attar-1.jpg" alt="Foto Attar 1">
-        <img class="fan-img fan-2" src="/static/img/attar-2.jpg" alt="Foto Attar 2">
-        <img class="fan-img fan-3" src="/static/img/attar-3.jpg" alt="Foto Attar 3">
-        <img class="fan-img fan-4" src="/static/img/attar-4.jpg" alt="Foto Attar 4">
+        <img class="fan-img fan-1" src="{% static 'img/attar-1.jpg' %}" alt="Foto Attar 1">
+        <img class="fan-img fan-2" src="{% static 'img/attar-2.jpg' %}" alt="Foto Attar 2">
+        <img class="fan-img fan-3" src="{% static 'img/attar-3.jpg' %}" alt="Foto Attar 3">
+        <img class="fan-img fan-4" src="{% static 'img/attar-4.jpg' %}" alt="Foto Attar 4">
       </div>
       <h2 class="fan-headline">INFORMATION<br>SYSTEM STUDENT</h2>
     </div>
@@ -213,7 +171,6 @@
     <div class="wrap get-to-know-content">
       <p class="eyebrow">Beyond the resume</p>
       <h2 class="section-title">GET TO KNOW MORE</h2>
-      </p>
       <a href="https://www.instagram.com/attarrrh?stkn=dnhodjRuYzJrcWR3"
          class="btn-primary ig-btn" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
@@ -223,14 +180,20 @@
       </a>
     </div>
   </section>
- 
+  
+  {% endblock content %}
+
+  {% block extra_js %}
+<!--  
   <footer class="site-footer">
     <div class="wrap">
       <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
     </div>
   </footer>
  
-  <script src="/static/js/theme-switcher.js"></script>
-  <script src="/static/js/parallax.js"></script>
-</body>
-</html>
+  <script src="/static/js/theme-switcher.js"></script> -->
+  <script src="{% static 'js/parallax.js' %}"></script>
+
+  {% endblock extra_js %}
+<!-- </body>
+</html> -->
