@@ -1,6 +1,8 @@
 from django.shortcuts import render
 
 from main.models import Experience, GalleryItem
+from main.forms import ExperienceForm, GalleryItemForm
+
 
 
 def show_main(request):
@@ -27,3 +29,33 @@ def show_about(request):
         "gallery_list": GalleryItem.objects.all(),
     }
     return render(request, "about.html", context)
+
+    
+def create_experience(request):
+    form = ExperienceForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Pengalaman baru berhasil ditambahkan!")
+        return redirect("main:show_experience")
+
+    context = {
+        "name": "Attar",
+        "form": form,
+    }
+    return render(request, "experience_form.html", context)
+
+
+def create_gallery_item(request):
+    form = GalleryItemForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Item galeri berhasil ditambahkan!")
+        return redirect("main:show_gallery")
+
+    context = {
+        "name": "Attar",
+        "form": form,
+    }
+    return render(request, "gallery_form.html", context)
