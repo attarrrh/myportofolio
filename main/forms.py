@@ -33,6 +33,9 @@ class ExperienceForm(ModelForm):
             "thumbnail": URLInput(
                 attrs={"placeholder": "https://drive.google.com/thumbnail?id=...&sz=w1000"}
             ),
+            "started_at": DateTimeInput(
+                attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"
+            ),
             "ended_at": DateTimeInput(
                 attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"
             ),

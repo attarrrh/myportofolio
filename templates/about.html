@@ -1,57 +1,30 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>About Me - {{ name }}</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
-
-  <!-- ============ TOMBOL GANTI TEMA ============ -->
-  <div class="theme-widget" id="themeWidget">
-    <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Ganti warna tema" title="Ganti warna tema">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8">
-        <circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/>
-        <circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/>
-        <path d="M12 2a10 10 0 1 0 5.66 18.24c.9-.63.34-2.05-.75-1.94a3.5 3.5 0 0 1-.41-6.98 1.5 1.5 0 0 0 1.36-2.1A10 10 0 0 0 12 2Z"/>
-      </svg>
-    </button>
-    <div class="theme-panel" id="themePanel">
-      <button class="swatch" data-theme="cobalt" style="--sw:#1E56F6" title="Cobalt"></button>
-      <button class="swatch" data-theme="forest" style="--sw:#1B4332" title="Forest"></button>
-      <button class="swatch" data-theme="wine" style="--sw:#3D0B24" title="Wine"></button>
-      <button class="swatch" data-theme="ecru" style="--sw:#F1ECDE" title="Ecru"></button>
-      <button class="swatch" data-theme="ink" style="--sw:#121212" title="Ink"></button>
-      <button class="swatch" data-theme="paper" style="--sw:#FFFFFF" title="Paper"></button>
-    </div>
-  </div>
-
-  <!-- ============ NAV ============ -->
-  <header class="site-header">
-    <div class="wrap header-inner">
-      <a href="{% url 'main:show_main' %}" class="logo">AT.</a>
-      <nav class="main-nav">
-        <a href="{% url 'main:show_main' %}">Profile</a>
-        <a href="{% url 'main:show_experience' %}">Experience</a>
-        <a href="{% url 'main:show_about' %}">About Me</a>
-      </nav>
-    </div>
-  </header>
-
+{% extends "base.html" %}
+{% block meta %}
+    <title>About Me - {{ name }}</title>
+{% endblock meta %}
+{% block content %}
   <main>
 
-  <!-- ============ ABOUT ME GALLERY (dari database) ============ -->
+  <!-- ============ ABOUT ME GALLERY (dari database, via JSON) ============ -->
   <section id="about" class="experience experience-page">
     <div class="wrap">
-      <!-- <p class="eyebrow">Beyond the resume, literally</p> -->
-      <h1 class="section-title">ABOUT ME</h1>
+      <div class="list-header">
+        <h1 class="section-title">ABOUT ME</h1>
+        <a href="{% url 'main:create_gallery_item' %}" class="button list-add-button">
+            <span aria-hidden="true">+</span> Tambah Item
+        </a>
+      </div>
       <p class="section-sub">Photo, Video of My Life</p>
+
+      <form method="get" action="{% url 'main:show_about' %}" class="list-search">
+          <input type="search"
+                 name="title"
+                 value="{{ title_query }}"
+                 placeholder="Cari berdasarkan judul"
+                 class="list-search__input"
+                 aria-label="Cari berdasarkan judul">
+          <button type="submit" class="button">Cari</button>
+      </form>
 
       <div class="gallery-grid">
         {% for item in gallery_list %}
@@ -67,23 +40,19 @@
             <span class="gallery-category">{{ item.get_category_display }}</span>
             <h3>{{ item.title }}</h3>
             {% if item.caption %}<p>{{ item.caption }}</p>{% endif %}
+            {% include "components/delete_modal.html" with object=item delete_url_name="main:delete_gallery_item" %}
           </div>
         </div>
         {% empty %}
-        <p class="empty-state">Belum ada item galeri yang ditambahkan.</p>
+        {% if title_query %}
+          <p class="empty-state">Tidak ada item dengan judul tersebut.</p>
+        {% else %}
+          <p class="empty-state">Belum ada item galeri yang ditambahkan.</p>
+        {% endif %}
         {% endfor %}
       </div>
     </div>
   </section>
 
   </main>
-
-  <footer class="site-footer">
-    <div class="wrap">
-      <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
-    </div>
-  </footer>
-
-  <script src="/static/js/theme-switcher.js"></script>
-</body>
-</html>
+{% endblock content %}

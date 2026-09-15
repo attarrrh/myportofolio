@@ -20,17 +20,56 @@ def show_main(request):
     return render(request, "index.html", context)
 
 
+def get_experience_json(request):
+    title_query = request.GET.get("title", "").strip()
+    experiences = Experience.objects.all()
+
+    if title_query:
+        experiences = experiences.filter(title__icontains=title_query)
+
+    experiences_json = serializers.serialize("json", experiences)
+    return HttpResponse(experiences_json, content_type="application/json")
+
+
+def get_gallery_json(request):
+    title_query = request.GET.get("title", "").strip()
+    items = GalleryItem.objects.all()
+
+    if title_query:
+        items = items.filter(title__icontains=title_query)
+
+    items_json = serializers.serialize("json", items)
+    return HttpResponse(items_json, content_type="application/json")
+
+
 def show_experience(request):
+    json_response = get_experience_json(request)
+    experiences = serializers.deserialize(
+        "json", json_response.content.decode("utf-8")
+    )
+    experiences = [e.object for e in experiences]
+    title_query = request.GET.get("title", "").strip()
+
     context = {
         "name": "Attar",
-        "experience_list": Experience.objects.all(),
+        "experience_list": experiences,
+        "title_query": title_query,
     }
     return render(request, "experience.html", context)
 
+
 def show_about(request):
+    json_response = get_gallery_json(request)
+    items = serializers.deserialize(
+        "json", json_response.content.decode("utf-8")
+    )
+    items = [i.object for i in items]
+    title_query = request.GET.get("title", "").strip()
+
     context = {
         "name": "Attar Rais Hakam",
-        "gallery_list": GalleryItem.objects.all(),
+        "gallery_list": items,
+        "title_query": title_query,
     }
     return render(request, "about.html", context)
 
@@ -63,3 +102,25 @@ def create_gallery_item(request):
         "form": form,
     }
     return render(request, "about_form.html", context)
+
+def delete_experience(request, experience_id):
+    experience = get_object_or_404(Experience, pk=experience_id)
+
+    if request.method == "POST":
+        experience.delete()
+        messages.success(request, "Experience berhasil dihapus!")
+        return redirect("main:show_experience")
+
+    return redirect("main:show_experience")
+
+
+def delete_gallery_item(request, item_id):
+    item = get_object_or_404(GalleryItem, pk=item_id)
+
+    if request.method == "POST":
+        item.delete()
+        messages.success(request, "Item galeri berhasil dihapus!")
+        return redirect("main:show_about")
+
+    return redirect("main:show_about")
+

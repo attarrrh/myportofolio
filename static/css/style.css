@@ -529,3 +529,61 @@ a{ color:inherit; text-decoration:none; }
   .skills-grid{ grid-template-columns:1fr; }
   .main-nav{ display:none; }
 }
+
+/* ==========================================================
+   LIST HEADER + SEARCH (Experience & About)
+   ========================================================== */
+.list-header{
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 1rem; margin-bottom: .5rem;
+}
+.list-add-button{ display: inline-flex; align-items: center; gap: .45rem; }
+.list-add-button span{ font-size: 1.25rem; line-height: 1; }
+
+.list-search{ display: flex; gap: .75rem; margin: 1.5rem 0; }
+.list-search__input{
+  width: 100%; min-width: 0; padding: .7rem;
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: var(--paper); color: var(--bg); font: inherit;
+}
+.list-search__input:focus{ outline: 2px solid var(--accent); border-color: var(--accent); }
+
+/* ==========================================================
+   DELETE CONFIRMATION MODAL (Experience & About)
+   ========================================================== */
+.button-danger{ background: #b42318; color: #fff; }
+
+.delete-modal{
+  display: none; position: fixed; inset: 0; width: 100%; height: 100%;
+  padding: 1rem; border: 0; background: transparent; z-index: 50;
+  align-items: center; justify-content: center;
+}
+.delete-modal:popover-open{ display: flex; }
+.delete-modal__backdrop{
+  position: absolute; inset: 0; width: 100%; height: 100%; border: 0; padding: 0;
+  background: rgba(0,0,0,.58); cursor: default;
+}
+.delete-modal__content{
+  position: relative; z-index: 1; width: min(100%, 480px); padding: 1.5rem;
+  background: var(--paper); color: var(--bg);
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  box-shadow: 0 1rem 3rem rgba(0,0,0,.3);
+}
+.delete-modal__content h2{ margin: 0 0 .75rem; font-family: var(--font-heading); font-size: 1.4rem; }
+.delete-modal__close{
+  position: absolute; top: 1rem; right: 1rem; border: 0; padding: 0;
+  background: transparent; color: var(--bg); opacity: .6; font-size: 1.8rem; line-height: 1; cursor: pointer;
+}
+.delete-modal__actions{ display: flex; justify-content: flex-end; gap: .75rem; margin-top: 1.5rem; }
+.item-status{ margin-top: 1rem; }
+
+@media (max-width: 600px){
+  .list-header{ align-items: flex-start; flex-direction: column; }
+  .list-add-button{ width: 100%; justify-content: center; }
+  .list-search{ flex-direction: column; }
+  .list-search .button{ width: 100%; }
+  .delete-modal{ align-items: flex-end; padding: 0; }
+  .delete-modal__content{ width: 100%; padding: 1.25rem; border-radius: var(--radius-md) var(--radius-md) 0 0; }
+  .delete-modal__actions{ flex-direction: column-reverse; }
+  .delete-modal__actions .button{ width: 100%; text-align: center; }
+}
