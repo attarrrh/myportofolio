@@ -56,10 +56,10 @@ def create_gallery_item(request):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, "Item galeri berhasil ditambahkan!")
-        return redirect("main:show_gallery")
+        return redirect("main:show_about")
 
     context = {
         "name": "Attar",
         "form": form,
     }
-    return render(request, "gallery_form.html", context)
+    return render(request, "about_form.html", context)
