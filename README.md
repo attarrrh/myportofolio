@@ -50,5 +50,7 @@ karena penulisannya lebih ringkas lebih mudah untuk ditulis dan modifikasi, stru
 
 Alur dimulai dari menerima request dari user, masuk ke urls.py arahkan ke view sesuai dengan request, masuk kedalam view ambil data dari database, masuk ke bagian serializer yang akan mengubah object dari database jadi string JSON, terakhir dikirim kembali ke user melalui HttpResponse
 
+mengapa perlu di lakukan serialization, karena http cuma dapat mengirimkan object berupa byte/text, sementara data sebelumnya berbentuk python object dan atau object method, sehingga perlu dilakukan serialization sebagai proses penerjemahan object python tersebut menjadi text/byte yang bersifat lebih universal dan dapat dipahami oleh sistem apapun
+
 AI
-menggunakan ai untuk membantu memahami alur penugasan serta keterkaitan materi yang digunakan pada tutorial dengan apa yang digunakan untuk tugas ini, membantu proses pengecekan kode akhir dan refactoring jika diperlukan, membantu memahami lebih lanjut terkait perbedaan format data bagaimana penerapanya dalam tutor serta tugas dan juga membantu meelakukan perbaikan ketika terdapat eror terutama berurusan dengan git.
+menggunakan ai untuk membantu memahami alur rancangan penugasan serta keterkaitan materi yang digunakan pada tutorial dengan apa yang digunakan untuk tugas ini, membantu proses pengecekan kode akhir dan refactoring jika diperlukan, membantu memahami lebih lanjut terkait perbedaan format data bagaimana penerapanya dalam tutor serta tugas dan juga membantu meelakukan perbaikan ketika terdapat eror terutama berurusan dengan git.
