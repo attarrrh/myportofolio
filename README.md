@@ -40,6 +40,15 @@ menggunakan ai untuk membantu mengulang proses pembuatan app yang sebelumnya sud
 #TUGAS 3
 1. Jelaskan mengapa kita menggunakan ModelForm pada Django alih-alih membuat form HTML secara manual. Selain itu, jelaskan pula mengapa kita diwajibkan menambahkan {% csrf_token %} pada form tersebut!
 
+karena mengikuti prinsip DRY yang sebelumya kita terapkan pada base html, kurang lebih konsepnya sama dimana kita bisa mempersingkat dan meningkatkan efisiensi inputing agar tidak melakukan penulisan input manual berulang dengan langsung menurunkannya dari model dan form, mengapa wajib mengunakan csrf token, karena csrf token semacam sistem keamanan yang mencegah project Django dari serangan csrf dengan menolak segala post tanpa adanya token tersebut, token ini berfungsi sebagai sistem authentifikasi yang memberikan token unik persesi agar user dapat melakukan post request
+
 2. Pada Tutorial 03, kita membahas format data JSON dan XML. Mengapa JSON lebih disukai dalam pengembangan aplikasi web modern dibandingkan XML?
 
+karena penulisannya lebih ringkas lebih mudah untuk ditulis dan modifikasi, struktur yang dimiiliki JSON lebih sederhana dan native dengan javascript membuatnya fleksibel tanpa perlu library tambahan untuk melakukan parsing
+
 3. Jelaskan alur yang terjadi saat kamu menggunakan fungsi view untuk mengembalikan data portofoliomu dalam bentuk JSON. Mengapa kita perlu melakukan proses serialization pada model Django sebelum datanya dikembalikan?
+
+Alur dimulai dari menerima request dari user, masuk ke urls.py arahkan ke view sesuai dengan request, masuk kedalam view ambil data dari database, masuk ke bagian serializer yang akan mengubah object dari database jadi string JSON, terakhir dikirim kembali ke user melalui HttpResponse
+
+AI
+menggunakan ai untuk membantu memahami alur penugasan serta keterkaitan materi yang digunakan pada tutorial dengan apa yang digunakan untuk tugas ini, membantu proses pengecekan kode akhir dan refactoring jika diperlukan, membantu memahami lebih lanjut terkait perbedaan format data bagaimana penerapanya dalam tutor serta tugas dan juga membantu meelakukan perbaikan ketika terdapat eror terutama berurusan dengan git.
