@@ -587,3 +587,32 @@ a{ color:inherit; text-decoration:none; }
   .delete-modal__actions{ flex-direction: column-reverse; }
   .delete-modal__actions .button{ width: 100%; text-align: center; }
 }
+
+/* ==========================================================
+   FORM WRAPPER & SEC BUTTON
+   ========================================================== */
+.project-form{
+  width: 100%;
+  max-width: 640px;
+  margin-top: 1.5rem;
+}
+
+.button-secondary{
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--paper);
+}
+.button-secondary:hover{
+  background: rgba(255,255,255,.06);
+}
+
+.item-actions{
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+
+.empty-state{
+  opacity: .75;
+  font-size: 14px;
+  padding: 2rem 0;
+}

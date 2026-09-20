@@ -124,3 +124,35 @@ def delete_gallery_item(request, item_id):
 
     return redirect("main:show_about")
 
+def update_experience(request, experience_id):
+    experience = get_object_or_404(Experience, pk=experience_id)
+    form = ExperienceForm(request.POST or None, instance=experience)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Experience berhasil diperbarui!")
+        return redirect("main:show_experience")
+
+    context = {
+        "name": "Attar",
+        "form": form,
+        "experience": experience,
+    }
+    return render(request, "experience_form.html", context)
+
+
+def update_gallery_item(request, item_id):
+    item = get_object_or_404(GalleryItem, pk=item_id)
+    form = GalleryItemForm(request.POST or None, instance=item)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Item galeri berhasil diperbarui!")
+        return redirect("main:show_about")
+
+    context = {
+        "name": "Attar",
+        "form": form,
+        "item": item,
+    }
+    return render(request, "about_form.html", context)
