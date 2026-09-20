@@ -10,6 +10,8 @@ from main.views import (
     get_gallery_json,
     delete_experience,
     delete_gallery_item,
+    update_experience,
+    update_gallery_item,
 )
 
 app_name = "main"
@@ -24,4 +26,6 @@ urlpatterns = [
     path("api/gallery/", get_gallery_json, name="get_gallery_json"),
     path("experience/<uuid:experience_id>/delete/", delete_experience, name="delete_experience"),
     path("about/<uuid:item_id>/delete/", delete_gallery_item, name="delete_gallery_item"),
+    path("experience/<uuid:experience_id>/edit/", update_experience, name="update_experience"),
+    path("about/<uuid:item_id>/edit/", update_gallery_item, name="update_gallery_item"),
 ]
