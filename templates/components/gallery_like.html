@@ -1,0 +1,10 @@
+<form method="post" action="{% url 'main:toggle_like' item.id %}" class="like-form">
+    {% csrf_token %}
+    <button type="submit"
+            class="button button-like{% if user in item.liked_by.all %} is-liked{% endif %}"
+            title="{% if item.liked_by.all %}Disukai oleh {{ item.liked_by.all|join:', ' }}{% else %}Jadilah yang pertama menyukai{% endif %}">
+        <span aria-hidden="true">&#9829;</span>
+        {% if user in item.liked_by.all %}Batal Suka{% else %}Suka{% endif %}
+        <span class="like-count">{{ item.liked_by.count }}</span>
+    </button>
+</form>

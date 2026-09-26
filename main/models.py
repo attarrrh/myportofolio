@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.contrib.auth.models import User
 
 class Experience(models.Model):
     EXPERIENCE_CHOICES = [
@@ -47,6 +48,7 @@ class GalleryItem(models.Model):
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='hobby')
     media_url = models.URLField()
     created_at = models.DateTimeField(auto_now_add=True)
+    liked_by = models.ManyToManyField(User, related_name="liked_gallery_items", blank=True)
  
     class Meta:
         ordering = ['-created_at']

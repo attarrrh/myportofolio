@@ -2,9 +2,11 @@ import datetime
 from django.shortcuts import render
 from django.contrib import messages
 from django.core import serializers
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
 from main.models import Experience, GalleryItem
@@ -13,12 +15,15 @@ from main.forms import ExperienceForm, GalleryItemForm
 
 
 def show_main(request):
+    last_login = request.COOKIES.get(
+        "last_login", "Belum ada sesi login / Cookie tidak ditemukan"
+    )
     context = {
         "full_name": "ATTAR RAIS HAKAM",
         "name": "Attar",
         "npm": "2506656495",
         "study_program": "Bachelor of Information System",
-        # "bio": "I am a student at the University of Indonesia, majoring in Information Systems and my favorite class is kombistek",
+        "last_login": last_login,
     }
     return render(request, "index.html", context)
 
@@ -76,8 +81,12 @@ def show_about(request):
     }
     return render(request, "about.html", context)
 
-    
+
+@login_required(login_url="/login/")
 def create_experience(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    
     form = ExperienceForm(request.POST or None)
 
     if request.method == "POST" and form.is_valid():
@@ -92,7 +101,11 @@ def create_experience(request):
     return render(request, "experience_form.html", context)
 
 
+@login_required(login_url="/login/")
 def create_gallery_item(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    
     form = GalleryItemForm(request.POST or None)
 
     if request.method == "POST" and form.is_valid():
@@ -106,7 +119,12 @@ def create_gallery_item(request):
     }
     return render(request, "about_form.html", context)
 
+
+@login_required(login_url="/login/")
 def delete_experience(request, experience_id):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    
     experience = get_object_or_404(Experience, pk=experience_id)
 
     if request.method == "POST":
@@ -117,7 +135,11 @@ def delete_experience(request, experience_id):
     return redirect("main:show_experience")
 
 
+@login_required(login_url="/login/")
 def delete_gallery_item(request, item_id):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    
     item = get_object_or_404(GalleryItem, pk=item_id)
 
     if request.method == "POST":
@@ -127,7 +149,12 @@ def delete_gallery_item(request, item_id):
 
     return redirect("main:show_about")
 
+
+@login_required(login_url="/login/")
 def update_experience(request, experience_id):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
     experience = get_object_or_404(Experience, pk=experience_id)
     form = ExperienceForm(request.POST or None, instance=experience)
 
@@ -144,7 +171,11 @@ def update_experience(request, experience_id):
     return render(request, "experience_form.html", context)
 
 
+@login_required(login_url="/login/")
 def update_gallery_item(request, item_id):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    
     item = get_object_or_404(GalleryItem, pk=item_id)
     form = GalleryItemForm(request.POST or None, instance=item)
 
@@ -181,7 +212,9 @@ def login_user(request):
         user = form.get_user()
         login(request, user)
         response = redirect("main:show_main")
-        
+        response.set_cookie(
+            "last_login", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
         return response
 
     context = {
@@ -193,4 +226,31 @@ def login_user(request):
 def logout_user(request):
     logout(request)
     response = redirect("main:show_main")
+    response.delete_cookie("last_login")
     return response
+
+
+def get_gallery_json(request):
+    title_query = request.GET.get("title", "").strip()
+    items = GalleryItem.objects.all()
+
+    if title_query:
+        items = items.filter(title__icontains=title_query)
+
+    items_json = serializers.serialize(
+        "json", items, use_natural_foreign_keys=True
+    )
+    return HttpResponse(items_json, content_type="application/json")
+
+
+@login_required(login_url="/login/")
+def toggle_like(request, item_id):
+    item = get_object_or_404(GalleryItem, pk=item_id)
+
+    if request.method == "POST":
+        if request.user in item.liked_by.all():
+            item.liked_by.remove(request.user)
+        else:
+            item.liked_by.add(request.user)
+
+    return redirect("main:show_about")

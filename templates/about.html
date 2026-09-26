@@ -10,9 +10,11 @@
     <div class="wrap">
       <div class="list-header">
         <h1 class="section-title">ABOUT ME</h1>
+        {% if user.is_superuser %}
         <a href="{% url 'main:create_gallery_item' %}" class="button list-add-button">
             <span aria-hidden="true">+</span> Tambah Item
         </a>
+        {% endif %}
       </div>
       <p class="section-sub">Photo, Video of My Life</p>
 
@@ -40,7 +42,13 @@
             <span class="gallery-category">{{ item.get_category_display }}</span>
             <h3>{{ item.title }}</h3>
             {% if item.caption %}<p>{{ item.caption }}</p>{% endif %}
+            {% include "components/gallery_like.html" with item=item %}
+            {% if user.is_superuser %}
+            <p class="item-actions">
+              <a href="{% url 'main:update_gallery_item' item.id %}" class="button button-secondary">Edit</a>
+            </p>
             {% include "components/delete_modal.html" with object=item delete_url_name="main:delete_gallery_item" %}
+            {% endif %}
           </div>
         </div>
         {% empty %}

@@ -11,9 +11,11 @@
     <div class="wrap">
       <div class="list-header">
         <h1 class="section-title">EXPERIENCE</h1>
+        {% if user.is_superuser %}
         <a href="{% url 'main:create_experience' %}" class="button list-add-button">
             <span aria-hidden="true">+</span> Tambah Experience
         </a>
+        {% endif %}
       </div>
       <p class="section-sub">Activities, organizations, and jobs I have been involved in</p>
 
@@ -47,7 +49,12 @@
                 {% if experience.is_ongoing %}Sedang berlangsung{% else %}Selesai{% endif %}
               </p>
               <p>{{ experience.description }}</p>
+              {% if user.is_superuser %}
+              <p class="item-actions">
+                <a href="{% url 'main:update_experience' experience.id %}" class="button button-secondary">Edit</a>
+              </p>
               {% include "components/delete_modal.html" with object=experience delete_url_name="main:delete_experience" %}
+              {% endif %}
             </div></div>
           </div>
         </li>

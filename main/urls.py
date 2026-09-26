@@ -16,6 +16,7 @@ from main.views import (
     register,
     login_user,
     logout_user,
+    toggle_like,
 )
 
 app_name = "main"
@@ -35,4 +36,5 @@ urlpatterns = [
     path("register/", register, name="register"),
     path("login/", login_user, name="login"),
     path("logout/", logout_user, name="logout"),
+    path("about/<uuid:item_id>/like/", toggle_like, name="toggle_like"),
 ]
