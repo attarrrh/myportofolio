@@ -1,6 +1,7 @@
 from django.urls import path
 
 from main.views import (
+    login_user,
     show_main,
     show_experience,
     show_about,
@@ -12,6 +13,9 @@ from main.views import (
     delete_gallery_item,
     update_experience,
     update_gallery_item,
+    register,
+    login_user,
+    logout_user,
 )
 
 app_name = "main"
@@ -28,4 +32,7 @@ urlpatterns = [
     path("about/<uuid:item_id>/delete/", delete_gallery_item, name="delete_gallery_item"),
     path("experience/<uuid:experience_id>/edit/", update_experience, name="update_experience"),
     path("about/<uuid:item_id>/edit/", update_gallery_item, name="update_gallery_item"),
+    path("register/", register, name="register"),
+    path("login/", login_user, name="login"),
+    path("logout/", logout_user, name="logout"),
 ]

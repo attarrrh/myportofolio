@@ -1,8 +1,11 @@
+import datetime
 from django.shortcuts import render
 from django.contrib import messages
 from django.core import serializers
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.auth import login, logout
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
 from main.models import Experience, GalleryItem
 from main.forms import ExperienceForm, GalleryItemForm
@@ -156,3 +159,38 @@ def update_gallery_item(request, item_id):
         "item": item,
     }
     return render(request, "about_form.html", context)
+
+def register(request):
+    form = UserCreationForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Akun berhasil dibuat. Silakan login.")
+        return redirect("main:login")
+
+    context = {
+        "name": "Attar",
+        "form": form,
+    }
+    return render(request, "register.html", context)
+
+def login_user(request):
+    form = AuthenticationForm(request, data=request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        user = form.get_user()
+        login(request, user)
+        response = redirect("main:show_main")
+        
+        return response
+
+    context = {
+        "name": "Attar",
+        "form": form,
+    }
+    return render(request, "login.html", context)
+
+def logout_user(request):
+    logout(request)
+    response = redirect("main:show_main")
+    return response
