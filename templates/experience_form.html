@@ -1,15 +1,16 @@
 {% extends "base.html" %}
 {% block meta %}
-    <title>Add Experience - {{ name }}</title>
+    <title>{% if experience %}Edit{% else %}Add{% endif %} Experience - {{ name }}</title>
 {% endblock meta %}
 {% block content %}
     <main>
         <section class="experience-section">
             <div class="wrap">
-                <h1>Add New Experience</h1>
+                <h1>{% if experience %}Edit Experience{% else %}Add New Experience{% endif %}</h1>
                 <form method="post"
-                      action="{% url 'main:create_experience' %}"
-                      class="project-form">
+                      action="{% if experience %}{% url 'main:update_experience' experience.id %}{% else %}{% url 'main:create_experience' %}{% endif %}"
+                      class="project-form"
+                      enctype="multipart/form-data">
                     {% csrf_token %}
                     {% for field in form %}
                         <div class="form-group">
@@ -20,9 +21,28 @@
                             {% endfor %}
                         </div>
                     {% endfor %}
-                    <button type="submit" class="button">Tambah Experience</button>
+                    <button type="submit" class="button">
+                        {% if experience %}Simpan Perubahan{% else %}Tambah Experience{% endif %}
+                    </button>
                     <a href="{% url 'main:show_experience' %}" class="button button-secondary">Batal</a>
                 </form>
+
+                {% if experience %}
+                <div class="media-manage">
+                    <h2>File saat ini</h2>
+                    {% for m in experience.media.all %}
+                        <div class="media-manage__item">
+                            <span>{{ m.filename }}</span>
+                            <form method="post" action="{% url 'main:delete_experience_media' m.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="button button-danger">Hapus</button>
+                            </form>
+                        </div>
+                    {% empty %}
+                        <p class="empty-state">Belum ada file.</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
         </section>
     </main>

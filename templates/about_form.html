@@ -1,15 +1,16 @@
 {% extends "base.html" %}
 {% block meta %}
-    <title>Add Gallery Item - {{ name }}</title>
+    <title>{% if item %}Edit{% else %}Add{% endif %} Gallery Item - {{ name }}</title>
 {% endblock meta %}
 {% block content %}
     <main>
         <section class="experience-section">
             <div class="wrap">
-                <h1>Add New Gallery Item</h1>
+                <h1>{% if item %}Edit Gallery Item{% else %}Add New Gallery Item{% endif %}</h1>
                 <form method="post"
-                      action="{% url 'main:create_gallery_item' %}"
-                      class="project-form">
+                      action="{% if item %}{% url 'main:update_gallery_item' item.id %}{% else %}{% url 'main:create_gallery_item' %}{% endif %}"
+                      class="project-form"
+                      enctype="multipart/form-data">
                     {% csrf_token %}
                     {% for field in form %}
                         <div class="form-group">
@@ -20,7 +21,9 @@
                             {% endfor %}
                         </div>
                     {% endfor %}
-                    <button type="submit" class="button">Tambah Item</button>
+                    <button type="submit" class="button">
+                        {% if item %}Simpan Perubahan{% else %}Tambah Item{% endif %}
+                    </button>
                     <a href="{% url 'main:show_about' %}" class="button button-secondary">Batal</a>
                 </form>
             </div>

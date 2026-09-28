@@ -32,10 +32,18 @@
         {% for item in gallery_list %}
         <div class="gallery-card">
           <div class="gallery-media">
-            {% if item.media_type == "video" %}
-              <video src="{{ item.media_url }}" controls preload="metadata"></video>
-            {% else %}
-              <img src="{{ item.media_url }}" alt="{{ item.title }}" loading="lazy">
+            {% if item.media_file %}
+              {% if item.media_type == "video" %}
+                <video src="{{ item.media_file.url }}" controls preload="metadata"></video>
+              {% else %}
+                <img src="{{ item.media_file.url }}" alt="{{ item.title }}" loading="lazy">
+              {% endif %}
+            {% elif item.media_url %}
+              {% if item.media_type == "video" %}
+                <video src="{{ item.media_url }}" controls preload="metadata"></video>
+              {% else %}
+                <img src="{{ item.media_url }}" alt="{{ item.title }}" loading="lazy">
+              {% endif %}
             {% endif %}
           </div>
           <div class="gallery-info">

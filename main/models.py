@@ -1,6 +1,8 @@
 import uuid
 from django.db import models
 from django.contrib.auth.models import User
+import os
+
 
 class Experience(models.Model):
     EXPERIENCE_CHOICES = [
@@ -25,7 +27,25 @@ class Experience(models.Model):
     @property
     def is_ongoing(self):
         return self.ended_at is None
+class ExperienceMedia(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    experience = models.ForeignKey(
+        Experience, related_name="media", on_delete=models.CASCADE
+    )
+    file = models.FileField(upload_to="experience/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def filename(self):
+        return os.path.basename(self.file.name)
+
+    @property
+    def is_image(self):
+        return os.path.splitext(self.file.name)[1].lower() in {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+
+    @property
+    def is_video(self):
+        return os.path.splitext(self.file.name)[1].lower() in {".mp4", ".webm", ".mov"}
     
 class GalleryItem(models.Model):
     MEDIA_TYPE_CHOICES = [
@@ -49,6 +69,7 @@ class GalleryItem(models.Model):
     media_url = models.URLField()
     created_at = models.DateTimeField(auto_now_add=True)
     liked_by = models.ManyToManyField(User, related_name="liked_gallery_items", blank=True)
+    media_file = models.FileField(upload_to="gallery/")
  
     class Meta:
         ordering = ['-created_at']

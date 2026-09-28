@@ -37,13 +37,28 @@
             {% if experience.is_ongoing %}Present{% else %}{{ experience.ended_at|date:"M Y" }}{% endif %}
           </div>
           <div class="timeline-body">
-            <h3 class="timeline-title" tabindex="0">
-              {{ experience.title }}
-              <span>{{ experience.get_category_display }}</span>
-            </h3>
-            <div class="timeline-reveal"><div class="reveal-inner">
-              {% if experience.thumbnail %}
-                <img src="{{ experience.thumbnail }}" alt="{{ experience.title }}" class="timeline-img">
+            <details class="exp-details">
+            <summary class="exp-summary">
+              <h3 class="exp-title">
+                {{ experience.title }}
+                <span>{{ experience.get_category_display }}</span>
+              </h3>
+            </summary>
+            <div class="exp-content">
+              {% if experience.media.all %}
+              <div class="exp-media">
+                {% for m in experience.media.all %}
+                  {% if m.is_image %}
+                    <a href="{{ m.file.url }}" target="_blank" rel="noopener" class="exp-thumb-link">
+                      <img src="{{ m.file.url }}" alt="{{ experience.title }}" class="exp-thumb" loading="lazy">
+                    </a>
+                  {% elif m.is_video %}
+                    <video src="{{ m.file.url }}" class="exp-thumb" controls preload="metadata"></video>
+                  {% else %}
+                    <a href="{{ m.file.url }}" class="exp-file" target="_blank" rel="noopener">{{ m.filename }}</a>
+                  {% endif %}
+                {% endfor %}
+              </div>
               {% endif %}
               <p class="timeline-loc">
                 {% if experience.is_ongoing %}Sedang berlangsung{% else %}Selesai{% endif %}
@@ -55,7 +70,8 @@
               </p>
               {% include "components/delete_modal.html" with object=experience delete_url_name="main:delete_experience" %}
               {% endif %}
-            </div></div>
+            </div>
+            </details>
           </div>
         </li>
         {% empty %}

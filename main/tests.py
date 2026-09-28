@@ -1,3 +1,5 @@
+from django.contrib import messages
+from django.contrib.messages.storage.fallback import FallbackStorage
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -88,3 +90,17 @@ class AboutTest(TestCase):
         response = self.client.get(reverse("main:show_about"))
         self.assertContains(response, "Belum ada item galeri yang ditambahkan.")
         self.assertNotContains(response, self.gallery_item.title)
+
+
+class AuthFlowTest(TestCase):
+    def test_login_page_does_not_show_stale_messages(self):
+        response = self.client.get(reverse("main:login"))
+        request = response.wsgi_request
+        storage = FallbackStorage(request)
+        storage.add(messages.SUCCESS, "Pesan lama dari aksi sebelumnya")
+        request.session.modified = True
+
+        response = self.client.get(reverse("main:login"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Pesan lama dari aksi sebelumnya")

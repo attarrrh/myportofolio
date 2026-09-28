@@ -1,6 +1,7 @@
 from django.urls import path
 
 from main.views import (
+    delete_experience_media,
     login_user,
     show_main,
     show_experience,
@@ -37,4 +38,5 @@ urlpatterns = [
     path("login/", login_user, name="login"),
     path("logout/", logout_user, name="logout"),
     path("about/<uuid:item_id>/like/", toggle_like, name="toggle_like"),
+    path("experience/media/<uuid:media_id>/delete/", delete_experience_media, name="delete_experience_media"),
 ]
