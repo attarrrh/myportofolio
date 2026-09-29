@@ -1,9 +1,13 @@
 from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from main.forms import ExperienceForm
 from main.models import Experience, GalleryItem
 
 
@@ -32,6 +36,12 @@ class MainTest(TestCase):
         self.assertTrue(self.experience.is_ongoing)
 
     def test_experience_page(self):
+        user = self.client.login(username="admin", password="admin123")
+        if not user:
+            from django.contrib.auth import get_user_model
+            get_user_model().objects.create_superuser(username="admin", password="admin123", email="admin@example.com")
+            self.client.login(username="admin", password="admin123")
+
         response = self.client.get(reverse("main:show_experience"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "experience.html")
@@ -39,7 +49,31 @@ class MainTest(TestCase):
         self.assertContains(response, self.experience.description)
         self.assertContains(response, "Part-Time")
         self.assertContains(response, "Sedang berlangsung")
+        self.assertContains(response, 'id="add-experience-modal"')
+        self.assertContains(response, 'id="experience-form"')
         self.assertContains(response, f'href="{reverse("main:show_main")}"')
+
+    def test_experience_json_includes_primary_key_for_actions(self):
+        response = self.client.get(reverse("main:get_experience_json"))
+
+        self.assertEqual(response.status_code, 200)
+        item = response.json()[0]
+        self.assertEqual(item["pk"], str(self.experience.pk))
+        self.assertEqual(item["fields"]["title"], self.experience.title)
+
+    def test_experience_form_strips_html_input(self):
+        form = ExperienceForm(
+            data={
+                "title": "<script>alert('xss')</script>Pengalaman Baru",
+                "description": "<img src=x onerror=alert('xss')>deskripsi aman",
+                "category": "internship",
+                "ended_at": "",
+            }
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["title"], "Pengalaman Baru")
+        self.assertEqual(form.cleaned_data["description"], "deskripsi aman")
 
     def test_empty_experience_page(self):
         Experience.objects.all().delete()
@@ -104,3 +138,35 @@ class AuthFlowTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "Pesan lama dari aksi sebelumnya")
+
+
+class EditorPermissionTest(TestCase):
+    def setUp(self):
+        self.User = get_user_model()
+        self.editor = self.User.objects.create_user(username="editor", password="securepass123")
+
+        experience_ct = ContentType.objects.get(app_label="main", model="experience")
+        gallery_ct = ContentType.objects.get(app_label="main", model="galleryitem")
+
+        permissions = Permission.objects.filter(
+            content_type__in=[experience_ct, gallery_ct],
+            codename__in=[
+                "add_experience",
+                "change_experience",
+                "delete_experience",
+                "add_galleryitem",
+                "change_galleryitem",
+                "delete_galleryitem",
+            ],
+        )
+        self.editor.user_permissions.set(permissions)
+
+    def test_editor_with_manage_permission_can_access_experience_form(self):
+        self.client.login(username="editor", password="securepass123")
+        response = self.client.get(reverse("main:create_experience"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_editor_with_manage_permission_can_access_about_form(self):
+        self.client.login(username="editor", password="securepass123")
+        response = self.client.get(reverse("main:create_gallery_item"))
+        self.assertEqual(response.status_code, 200)

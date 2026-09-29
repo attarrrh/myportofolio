@@ -4,15 +4,34 @@ from django.contrib import messages
 from django.contrib.messages import get_messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.views.decorators.http import require_POST
+from django.template.defaultfilters import date as date_filter
 
 from main.models import Experience, ExperienceMedia, GalleryItem
 from main.forms import ExperienceForm, GalleryItemForm
 
+
+def user_can_manage_experience(user):
+    return (
+        user.is_superuser
+        or user.has_perm("main.add_experience")
+        or user.has_perm("main.change_experience")
+        or user.has_perm("main.delete_experience")
+    )
+
+
+def user_can_manage_gallery(user):
+    return (
+        user.is_superuser
+        or user.has_perm("main.add_galleryitem")
+        or user.has_perm("main.change_galleryitem")
+        or user.has_perm("main.delete_galleryitem")
+    )
 
 
 def show_main(request):
@@ -31,13 +50,38 @@ def show_main(request):
 
 def get_experience_json(request):
     title_query = request.GET.get("title", "").strip()
-    experiences = Experience.objects.all()
-
+    experiences = Experience.objects.prefetch_related("media").all()
+ 
     if title_query:
         experiences = experiences.filter(title__icontains=title_query)
-
-    experiences_json = serializers.serialize("json", experiences)
-    return HttpResponse(experiences_json, content_type="application/json")
+ 
+    data = []
+    for experience in experiences:
+        started = date_filter(experience.started_at, "M Y")
+        ended = "Present" if experience.is_ongoing else date_filter(experience.ended_at, "M Y")
+ 
+        data.append({
+            "pk": str(experience.id),
+            "fields": {
+                "title": experience.title,
+                "description": experience.description,
+                "category_display": experience.get_category_display(),
+                "started": started,
+                "ended": ended,
+                "is_ongoing": experience.is_ongoing,
+                "media": [
+                    {
+                        "url": m.file.url,
+                        "filename": m.filename,
+                        "is_image": m.is_image,
+                        "is_video": m.is_video,
+                    }
+                    for m in experience.media.all()
+                ],
+            },
+        })
+ 
+    return JsonResponse(data, safe=False)
 
 
 def get_gallery_json(request):
@@ -52,28 +96,27 @@ def get_gallery_json(request):
 
 
 def show_experience(request):
-    json_response = get_experience_json(request)
-    experiences = serializers.deserialize(
-        "json", json_response.content.decode("utf-8")
-    )
-    experiences = [e.object for e in experiences]
     title_query = request.GET.get("title", "").strip()
+    experiences = Experience.objects.prefetch_related("media").all()
+
+    if title_query:
+        experiences = experiences.filter(title__icontains=title_query)
 
     context = {
         "name": "Attar",
-        "experience_list": experiences,
         "title_query": title_query,
+        "experience_list": experiences,
+        "form": ExperienceForm(),
     }
     return render(request, "experience.html", context)
 
 
 def show_about(request):
-    json_response = get_gallery_json(request)
-    items = serializers.deserialize(
-        "json", json_response.content.decode("utf-8")
-    )
-    items = [i.object for i in items]
     title_query = request.GET.get("title", "").strip()
+    items = GalleryItem.objects.all()
+
+    if title_query:
+        items = items.filter(title__icontains=title_query)
 
     context = {
         "name": "Attar Rais Hakam",
@@ -85,7 +128,7 @@ def show_about(request):
 
 @login_required(login_url="/login/")
 def create_experience(request):
-    if not request.user.is_superuser:
+    if not user_can_manage_experience(request.user):
         raise PermissionDenied
 
     form = ExperienceForm(request.POST or None, request.FILES or None)
@@ -100,10 +143,31 @@ def create_experience(request):
     context = {"name": "Attar", "form": form}
     return render(request, "experience_form.html", context)
 
+@require_POST
+def create_experience_ajax(request):
+    user = request.user
+    if not (user.is_superuser or user.has_perm("main.add_experience")):
+        return JsonResponse(
+            {"message": "Kamu tidak punya izin untuk menambahkan experience."},
+            status=403,
+        )
+ 
+    form = ExperienceForm(request.POST, request.FILES)
+    if form.is_valid():
+        experience = form.save()
+        for f in form.cleaned_data["media_files"]:
+            ExperienceMedia.objects.create(experience=experience, file=f)
+        return JsonResponse(
+            {"message": "Experience berhasil ditambahkan.", "pk": str(experience.id)},
+            status=201,
+        )
+ 
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
 
 @login_required(login_url="/login/")
 def update_experience(request, experience_id):
-    if not request.user.is_superuser:
+    if not user_can_manage_experience(request.user):
         raise PermissionDenied
 
     experience = get_object_or_404(Experience, pk=experience_id)
@@ -122,7 +186,7 @@ def update_experience(request, experience_id):
 
 @login_required(login_url="/login/")
 def delete_experience(request, experience_id):
-    if not request.user.is_superuser:
+    if not user_can_manage_experience(request.user):
         raise PermissionDenied
 
     experience = get_object_or_404(Experience, pk=experience_id)
@@ -138,7 +202,7 @@ def delete_experience(request, experience_id):
 
 @login_required(login_url="/login/")
 def delete_experience_media(request, media_id):
-    if not request.user.is_superuser:
+    if not user_can_manage_experience(request.user):
         raise PermissionDenied
 
     media = get_object_or_404(ExperienceMedia, pk=media_id)
@@ -153,7 +217,7 @@ def delete_experience_media(request, media_id):
 
 @login_required(login_url="/login/")
 def create_gallery_item(request):
-    if not request.user.is_superuser:
+    if not user_can_manage_gallery(request.user):
         raise PermissionDenied
 
     form = GalleryItemForm(request.POST or None, request.FILES or None)
@@ -170,7 +234,7 @@ def create_gallery_item(request):
 
 @login_required(login_url="/login/")
 def delete_gallery_item(request, item_id):
-    if not request.user.is_superuser:
+    if not user_can_manage_gallery(request.user):
         raise PermissionDenied
     
     item = get_object_or_404(GalleryItem, pk=item_id)
@@ -185,7 +249,7 @@ def delete_gallery_item(request, item_id):
 
 @login_required(login_url="/login/")
 def update_gallery_item(request, item_id):
-    if not request.user.is_superuser:
+    if not user_can_manage_gallery(request.user):
         raise PermissionDenied
 
     item = get_object_or_404(GalleryItem, pk=item_id)

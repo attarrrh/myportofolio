@@ -1,0 +1,42 @@
+<div id="add-experience-modal"
+     class="exp-modal"
+     popover="auto"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="add-experience-modal-title">
+    <button type="button"
+            class="exp-modal__backdrop"
+            popovertarget="add-experience-modal"
+            popovertargetaction="hide"
+            aria-label="Tutup form tambah experience"></button>
+
+    <div class="exp-modal__content">
+        <button type="button"
+                class="exp-modal__close"
+                popovertarget="add-experience-modal"
+                popovertargetaction="hide"
+                aria-label="Tutup form tambah experience">×</button>
+
+        <h2 id="add-experience-modal-title">Tambah Experience Baru</h2>
+        <form id="experience-form"
+              method="post"
+              action="{% url 'main:create_experience' %}"
+              data-ajax-url="{% url 'main:create_experience_ajax' %}"
+              enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+            {% endfor %}
+            <div class="exp-modal__actions">
+                <button type="button"
+                        class="button button-secondary"
+                        popovertarget="add-experience-modal"
+                        popovertargetaction="hide">Batal</button>
+                <button type="submit" class="button">Tambah Experience</button>
+            </div>
+        </form>
+    </div>
+</div>

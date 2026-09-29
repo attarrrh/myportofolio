@@ -10,7 +10,7 @@
     <div class="wrap">
       <div class="list-header">
         <h1 class="section-title">ABOUT ME</h1>
-        {% if user.is_superuser %}
+        {% if user.is_superuser or perms.main.add_galleryitem %}
         <a href="{% url 'main:create_gallery_item' %}" class="button list-add-button">
             <span aria-hidden="true">+</span> Tambah Item
         </a>
@@ -18,13 +18,14 @@
       </div>
       <p class="section-sub">Photo, Video of My Life</p>
 
-      <form method="get" action="{% url 'main:show_about' %}" class="list-search">
+      <form method="get" action="{% url 'main:show_about' %}" class="list-search" data-live-search data-debounce-ms="450">
           <input type="search"
                  name="title"
                  value="{{ title_query }}"
                  placeholder="Cari berdasarkan judul"
                  class="list-search__input"
-                 aria-label="Cari berdasarkan judul">
+                 aria-label="Cari berdasarkan judul"
+                 autocomplete="off">
           <button type="submit" class="button">Cari</button>
       </form>
 
@@ -51,7 +52,7 @@
             <h3>{{ item.title }}</h3>
             {% if item.caption %}<p>{{ item.caption }}</p>{% endif %}
             {% include "components/gallery_like.html" with item=item %}
-            {% if user.is_superuser %}
+            {% if user.is_superuser or perms.main.change_galleryitem or perms.main.delete_galleryitem %}
             <p class="item-actions">
               <a href="{% url 'main:update_gallery_item' item.id %}" class="button button-secondary">Edit</a>
             </p>
@@ -72,3 +73,24 @@
 
   </main>
 {% endblock content %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-live-search]').forEach(function (form) {
+      const input = form.querySelector('input[type="search"]');
+      if (!input) return;
+
+      let timer = null;
+      const delay = Number(form.dataset.debounceMs || 450);
+
+      input.addEventListener('input', function () {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(function () {
+          form.requestSubmit();
+        }, delay);
+      });
+    });
+  });
+</script>
+{% endblock extra_js %}

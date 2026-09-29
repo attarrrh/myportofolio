@@ -1,7 +1,24 @@
+import os
+import re
+from html import unescape
+
 from django.forms import ModelForm, TextInput, Textarea, URLInput, Select, DateTimeInput, ClearableFileInput, FileField
+from django.utils.html import strip_tags
 from django.core.exceptions import ValidationError
 from main.models import Experience, GalleryItem
-import os
+
+
+def sanitize_html_text(value):
+    if value is None:
+        return ""
+
+    text = str(value)
+    text = re.sub(r"(?is)<\s*(script|style|iframe|object|embed|svg|math)\b[^>]*>.*?<\s*/\s*\1\s*>", " ", text)
+    text = re.sub(r"(?is)<\s*[^>]+>", " ", text)
+    text = re.sub(r"(?i)\s+on\w+\s*=\s*(?:\"[^\"]*\"|'[^']*'|[^\s>]+)", " ", text)
+    text = unescape(text)
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
 
 
 class MultipleFileInput(ClearableFileInput):
@@ -47,6 +64,18 @@ class ExperienceForm(ModelForm):
             "category": Select(),
             "ended_at": DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
         }
+
+    def clean_title(self):
+        title = sanitize_html_text(self.cleaned_data["title"])
+        if not title:
+            raise ValidationError("Judul pengalaman tidak boleh kosong.")
+        return title
+
+    def clean_description(self):
+        description = sanitize_html_text(self.cleaned_data["description"])
+        if not description:
+            raise ValidationError("Deskripsi pengalaman tidak boleh kosong.")
+        return description
 
     def clean_media_files(self):
         files = [f for f in self.cleaned_data.get("media_files", []) if f]
@@ -100,3 +129,12 @@ class GalleryItemForm(ModelForm):
             if f.size > self.MAX_SIZE:
                 self.add_error("media_file", "Ukuran file maksimal 25 MB.")
         return cleaned
+
+    def clean_title(self):
+        title = sanitize_html_text(self.cleaned_data["title"])
+        if not title:
+            raise ValidationError("Judul tidak boleh hanya berisi tag HTML.")
+        return title
+ 
+    def clean_description(self):
+        return sanitize_html_text(self.cleaned_data["description"])
