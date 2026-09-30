@@ -122,6 +122,7 @@ def show_about(request):
         "name": "Attar Rais Hakam",
         "gallery_list": items,
         "title_query": title_query,
+        "form": GalleryItemForm(),
     }
     return render(request, "about.html", context)
 
@@ -229,6 +230,26 @@ def create_gallery_item(request):
 
     context = {"name": "Attar", "form": form}
     return render(request, "about_form.html", context)
+
+
+@require_POST
+def create_gallery_item_ajax(request):
+    user = request.user
+    if not (user.is_authenticated and user_can_manage_gallery(user)):
+        return JsonResponse(
+            {"message": "Kamu tidak punya izin untuk menambahkan item galeri."},
+            status=403,
+        )
+
+    form = GalleryItemForm(request.POST, request.FILES)
+    if form.is_valid():
+        item = form.save()
+        return JsonResponse(
+            {"message": "Item galeri berhasil ditambahkan.", "pk": str(item.pk)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
 
 
 

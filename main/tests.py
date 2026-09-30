@@ -3,9 +3,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.storage.fallback import FallbackStorage
-from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
+import tempfile
 
 from main.forms import ExperienceForm
 from main.models import Experience, GalleryItem
@@ -104,6 +106,45 @@ class AboutTest(TestCase):
         response = self.client.get(reverse("main:show_about"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "about.html")
+
+    def test_about_page_shows_create_modal_for_superuser(self):
+        user = get_user_model().objects.create_superuser(
+            username="gallery-admin",
+            password="securepass123",
+            email="gallery-admin@example.com",
+        )
+        self.client.force_login(user)
+
+        response = self.client.get(reverse("main:show_about"))
+
+        self.assertContains(response, 'id="add-gallery-item-modal"')
+        self.assertContains(response, 'id="gallery-item-form"')
+        self.assertContains(response, reverse("main:create_gallery_item_ajax"))
+
+    def test_superuser_can_create_gallery_item_with_ajax(self):
+        user = get_user_model().objects.create_superuser(
+            username="gallery-creator",
+            password="securepass123",
+            email="gallery-creator@example.com",
+        )
+        self.client.force_login(user)
+        upload = SimpleUploadedFile("memory.jpg", b"fake image data", content_type="image/jpeg")
+
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+                response = self.client.post(
+                    reverse("main:create_gallery_item_ajax"),
+                    {
+                        "title": "A new memory",
+                        "caption": "A caption",
+                        "media_type": "photo",
+                        "category": "hobby",
+                        "media_file": upload,
+                    },
+                )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(GalleryItem.objects.filter(title="A new memory").exists())
 
     def test_gallery_item_model(self):
         self.assertEqual(str(self.gallery_item), "Main futsal bareng temen")

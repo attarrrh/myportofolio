@@ -2,6 +2,7 @@ from django.urls import path
 
 from main.views import (
     create_experience_ajax,
+    create_gallery_item_ajax,
     delete_experience_media,
     login_user,
     show_main,
@@ -41,4 +42,5 @@ urlpatterns = [
     path("about/<uuid:item_id>/like/", toggle_like, name="toggle_like"),
     path("experience/media/<uuid:media_id>/delete/", delete_experience_media, name="delete_experience_media"),
     path("experience/add-ajax/", create_experience_ajax, name="create_experience_ajax"),
+    path("about/add-ajax/", create_gallery_item_ajax, name="create_gallery_item_ajax"),
 ]

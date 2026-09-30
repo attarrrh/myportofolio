@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block meta %}
     <title>About Me - {{ name }}</title>
 {% endblock meta %}
@@ -11,9 +12,10 @@
       <div class="list-header">
         <h1 class="section-title">ABOUT ME</h1>
         {% if user.is_superuser or perms.main.add_galleryitem %}
-        <a href="{% url 'main:create_gallery_item' %}" class="button list-add-button">
+        <button type="button" class="button list-add-button"
+          popovertarget="add-gallery-item-modal" popovertargetaction="show">
             <span aria-hidden="true">+</span> Tambah Item
-        </a>
+        </button>
         {% endif %}
       </div>
       <p class="section-sub">Photo, Video of My Life</p>
@@ -71,6 +73,10 @@
     </div>
   </section>
 
+  {% if user.is_superuser or perms.main.add_galleryitem %}
+    {% include "components/gallery_item_form_modal.html" with form=form %}
+  {% endif %}
+
   </main>
 {% endblock content %}
 
@@ -90,6 +96,42 @@
           form.requestSubmit();
         }, delay);
       });
+    });
+
+    const form = document.getElementById('gallery-item-form');
+    if (!form) return;
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+      const modal = document.getElementById('add-gallery-item-modal');
+
+      try {
+        const response = await fetch(form.dataset.ajaxUrl, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'X-CSRFToken': csrfToken, 'Accept': 'application/json' }
+        });
+        const result = await response.json();
+
+        if (!response.ok) {
+          const errors = Object.values(result.errors || {})
+            .flat()
+            .map((error) => typeof error === 'string' ? error : error.message)
+            .filter(Boolean)
+            .join('\n');
+          showToast('Gagal menambahkan item', errors || result.message || 'Periksa kembali isian form.', 'error');
+          return;
+        }
+
+        if (modal && typeof modal.hidePopover === 'function') modal.hidePopover();
+        form.reset();
+        showToast('Sukses', result.message || 'Item galeri berhasil ditambahkan.', 'success');
+        window.setTimeout(function () { window.location.reload(); }, 500);
+      } catch (error) {
+        showToast('Gagal menambahkan item', 'Silakan coba lagi.', 'error');
+      }
     });
   });
 </script>
