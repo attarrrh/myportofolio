@@ -38,9 +38,11 @@
   <header class="site-header">
     <div class="wrap header-inner">
       <a href="{% url 'main:show_main' %}" class="logo">AT.</a>
+      <button class="nav-toggle" id="navToggle" type="button"
+              aria-controls="mainNav" aria-expanded="false" aria-label="Buka menu navigasi">
         <span></span><span></span><span></span>
-      </label>
-      <nav class="main-nav" id="mainNav">
+      </button>
+      <nav class="main-nav" id="mainNav" aria-label="Navigasi utama">
         <a href="{% url 'main:show_main' %}">Profile</a>
         <a href="{% url 'main:show_experience' %}">Experience</a>
         <a href="{% url 'main:show_about' %}">About Me</a>
@@ -67,6 +69,7 @@
   {% include 'components/toast.html' %}
 
   <script src="{% static 'js/theme-switcher.js' %}"></script>
+  <script src="{% static 'js/nav.js' %}"></script>
   {% block extra_js %}{% endblock extra_js %}
 </body>
 </html>
