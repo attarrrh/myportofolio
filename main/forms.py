@@ -12,11 +12,10 @@ def sanitize_html_text(value):
     if value is None:
         return ""
 
-    text = str(value)
+    text = unescape(str(value))
     text = re.sub(r"(?is)<\s*(script|style|iframe|object|embed|svg|math)\b[^>]*>.*?<\s*/\s*\1\s*>", " ", text)
     text = re.sub(r"(?is)<\s*[^>]+>", " ", text)
     text = re.sub(r"(?i)\s+on\w+\s*=\s*(?:\"[^\"]*\"|'[^']*'|[^\s>]+)", " ", text)
-    text = unescape(text)
     text = re.sub(r"\s+", " ", text)
     return text.strip()
 
@@ -66,13 +65,13 @@ class ExperienceForm(ModelForm):
         }
 
     def clean_title(self):
-        title = sanitize_html_text(self.cleaned_data["title"])
+        title = strip_tags(sanitize_html_text(self.cleaned_data["title"]))
         if not title:
             raise ValidationError("Judul pengalaman tidak boleh kosong.")
         return title
 
     def clean_description(self):
-        description = sanitize_html_text(self.cleaned_data["description"])
+        description = strip_tags(sanitize_html_text(self.cleaned_data["description"]))
         if not description:
             raise ValidationError("Deskripsi pengalaman tidak boleh kosong.")
         return description
@@ -131,10 +130,10 @@ class GalleryItemForm(ModelForm):
         return cleaned
 
     def clean_title(self):
-        title = sanitize_html_text(self.cleaned_data["title"])
+        title = strip_tags(sanitize_html_text(self.cleaned_data["title"]))
         if not title:
             raise ValidationError("Judul tidak boleh hanya berisi tag HTML.")
         return title
  
-    def clean_description(self):
-        return sanitize_html_text(self.cleaned_data["description"])
+    def clean_caption(self):
+        return strip_tags(sanitize_html_text(self.cleaned_data["caption"]))

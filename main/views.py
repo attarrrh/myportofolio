@@ -1,10 +1,8 @@
 import datetime
-from django.shortcuts import render
 from django.contrib import messages
 from django.contrib.messages import get_messages
-from django.core import serializers
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
@@ -86,50 +84,46 @@ def get_experience_json(request):
 
 def get_gallery_json(request):
     title_query = request.GET.get("title", "").strip()
-    items = GalleryItem.objects.all()
-
+    items = GalleryItem.objects.prefetch_related("liked_by").all()
     if title_query:
         items = items.filter(title__icontains=title_query)
-
-    items_json = serializers.serialize("json", items)
-    return HttpResponse(items_json, content_type="application/json")
+    data = []
+    for item in items:
+        users = list(item.liked_by.all())
+        data.append({
+            "pk": str(item.pk),
+            "fields": {
+                "title": item.title,
+                "caption": item.caption,
+                "category_display": item.get_category_display(),
+                "media_type": item.media_type,
+                "media_url": item.media_file.url if item.media_file else item.media_url,
+                "star_count": len(users),
+                "is_starred": request.user.is_authenticated and any(user.pk == request.user.pk for user in users),
+            },
+        })
+    return JsonResponse(data, safe=False)
 
 
 def show_experience(request):
-    title_query = request.GET.get("title", "").strip()
-    experiences = Experience.objects.prefetch_related("media").all()
-
-    if title_query:
-        experiences = experiences.filter(title__icontains=title_query)
-
-    context = {
+    return render(request, "experience.html", {
         "name": "Attar",
-        "title_query": title_query,
-        "experience_list": experiences,
+        "title_query": request.GET.get("title", "").strip(),
         "form": ExperienceForm(),
-    }
-    return render(request, "experience.html", context)
+    })
 
 
 def show_about(request):
-    title_query = request.GET.get("title", "").strip()
-    items = GalleryItem.objects.all()
-
-    if title_query:
-        items = items.filter(title__icontains=title_query)
-
-    context = {
+    return render(request, "about.html", {
         "name": "Attar Rais Hakam",
-        "gallery_list": items,
-        "title_query": title_query,
+        "title_query": request.GET.get("title", "").strip(),
         "form": GalleryItemForm(),
-    }
-    return render(request, "about.html", context)
+    })
 
 
 @login_required(login_url="/login/")
 def create_experience(request):
-    if not user_can_manage_experience(request.user):
+    if not request.user.has_perm("main.add_experience"):
         raise PermissionDenied
 
     form = ExperienceForm(request.POST or None, request.FILES or None)
@@ -147,7 +141,7 @@ def create_experience(request):
 @require_POST
 def create_experience_ajax(request):
     user = request.user
-    if not (user.is_superuser or user.has_perm("main.add_experience")):
+    if not (user.is_authenticated and user.has_perm("main.add_experience")):
         return JsonResponse(
             {"message": "Kamu tidak punya izin untuk menambahkan experience."},
             status=403,
@@ -218,7 +212,7 @@ def delete_experience_media(request, media_id):
 
 @login_required(login_url="/login/")
 def create_gallery_item(request):
-    if not user_can_manage_gallery(request.user):
+    if not request.user.has_perm("main.add_galleryitem"):
         raise PermissionDenied
 
     form = GalleryItemForm(request.POST or None, request.FILES or None)
@@ -235,7 +229,7 @@ def create_gallery_item(request):
 @require_POST
 def create_gallery_item_ajax(request):
     user = request.user
-    if not (user.is_authenticated and user_can_manage_gallery(user)):
+    if not (user.is_authenticated and user.has_perm("main.add_galleryitem")):
         return JsonResponse(
             {"message": "Kamu tidak punya izin untuk menambahkan item galeri."},
             status=403,
@@ -327,27 +321,20 @@ def logout_user(request):
     return response
 
 
-def get_gallery_json(request):
-    title_query = request.GET.get("title", "").strip()
-    items = GalleryItem.objects.all()
-
-    if title_query:
-        items = items.filter(title__icontains=title_query)
-
-    items_json = serializers.serialize(
-        "json", items, use_natural_foreign_keys=True
-    )
-    return HttpResponse(items_json, content_type="application/json")
-
-
-@login_required(login_url="/login/")
+@require_POST
 def toggle_like(request, item_id):
+    ajax = request.headers.get("Accept") == "application/json"
+    if not request.user.is_authenticated:
+        if ajax:
+            return JsonResponse({"message": "Silakan login untuk memberi star."}, status=403)
+        return redirect("main:login")
     item = get_object_or_404(GalleryItem, pk=item_id)
-
-    if request.method == "POST":
-        if request.user in item.liked_by.all():
-            item.liked_by.remove(request.user)
-        else:
-            item.liked_by.add(request.user)
-
+    if item.liked_by.filter(pk=request.user.pk).exists():
+        item.liked_by.remove(request.user)
+        starred = False
+    else:
+        item.liked_by.add(request.user)
+        starred = True
+    if ajax:
+        return JsonResponse({"star_count": item.liked_by.count(), "is_starred": starred})
     return redirect("main:show_about")

@@ -54,3 +54,27 @@ mengapa perlu di lakukan serialization, karena http cuma dapat mengirimkan objec
 
 AI
 menggunakan ai untuk membantu memahami alur rancangan penugasan serta keterkaitan materi yang digunakan pada tutorial dengan apa yang digunakan untuk tugas ini, membantu proses pengecekan kode akhir dan refactoring jika diperlukan, membantu memahami lebih lanjut terkait perbedaan format data bagaimana penerapanya dalam tutor serta tugas dan juga membantu meelakukan perbaikan ketika terdapat eror terutama berurusan dengan git.
+
+
+#TUGAS 5
+1. Jelaskan apa itu debouncing dan mengapa teknik ini penting diterapkan pada fitur pencarian yang menggunakan AJAX!
+
+debouncing itu semacam ngasih jeda sebelum menjalankan proses, jadi setiap user mengetik timer sebelumnya dibatalin terus mulai lagi dari awal, di project ini aku pakai jeda 450 ms jadi request pencarian baru dikirim setelah user berhenti mengetik selama waktu tersebut. kenapa penting, karena kalo setiap huruf langsung ngirim request bakal banyak request yang sebenernya ga perlu, misalnya pas mau ngetik research malah ngirim pencarian dari r, re, res dan seterusnya, jadinya lebih berat buat server dan tampilan juga bisa berubah ubah terus, dengan debouncing pencarian jadi lebih efisien dan enak dipakai
+
+2. Jelaskan fungsi dari penggunaan await ketika kita menggunakan fetch()! Apa yang akan terjadi jika kita tidak menggunakan await?
+
+fetch itu proses asynchronous yang hasil awalnya berupa Promise, await dipakai untuk menunggu Promise tersebut selesai sebelum lanjut ke baris berikutnya dalam fungsi async, jadi response yang kita terima sudah berupa object Response yang bisa dicek statusnya, setelah itu response.json() juga perlu ditunggu karena proses membaca dan mengubah isi respons jadi object javascript juga asynchronous. selama nunggu bukan berarti seluruh browser berhenti, yang ditunda cuma kelanjutan fungsi tersebut
+
+kalo ga pakai await dan hasil fetch langsung dipakai seolah olah sudah berupa Response, yang kita pegang masih Promise jadi response.json() bakal eror karena method tersebut bukan milik Promise. sebenernya tetap bisa tanpa await dengan memakai .then() dan .catch(), yang penting hasil requestnya tetap ditangani setelah prosesnya selesai
+
+3. Jelaskan apa itu serangan XSS (Cross-Site Scripting) dan mengapa data yang ditampilkan melalui AJAX/JavaScript lebih rentan terhadap serangan ini daripada data yang ditampilkan langsung melalui template Django!
+
+XSS itu serangan ketika input dari user berisi kode berbahaya lalu masuk ke halaman dan dijalankan browser sebagai kode, misalnya input judul berisi tag dengan onerror yang akhirnya bisa menjalankan javascript untuk mengambil data yang dapat diakses halaman atau melakukan aksi memakai sesi user
+
+data lewat AJAX sebenernya ga otomatis berbahaya karena JSON sendiri cuma data, masalahnya muncul pas javascript menyisipkan nilai tersebut ke HTML misalnya lewat innerHTML tanpa escaping, browser bisa menganggap input tadi sebagai markup dan menjalankan kode di dalamnya. sementara template Django secara default punya autoescaping untuk nilai teks sehingga karakter seperti < dan > ditampilkan sebagai teks, jadi perlindungan ini harus kita tangani sendiri saat menyusun tampilan lewat javascript
+
+di project ini aku pakai textContent untuk menampilkan nilai teks supaya input ga dianggap sebagai HTML, terus input judul, deskripsi dan caption dibersihkan di method clean pada ModelForm menggunakan strip_tags, tapi pembersihan server ini tetap perlu dibarengi cara menampilkan data yang aman di browser, terutama kalo ada data lama yang belum dibersihkan
+
+
+AI
+menggunakan ai untuk membantu memeriksa kesesuaian project dengan checklist tugas, membantu evaluasi halaman experience dan about agar pengambilan data, pencarian sesuai framework AJAX, membantu penerapan debouncing, serta pengecekan permission dan perlindungan XSS, juga membantu proses testing

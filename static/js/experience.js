@@ -1,18 +1,3 @@
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-function sanitizeText(value) {
-  return String(value ?? '').replace(/[<>]/g, function (char) {
-    return char === '<' ? '&lt;' : '&gt;';
-  });
-}
-
 function getExperienceFields(experience) {
   if (experience && experience.fields) {
     return {
@@ -73,7 +58,8 @@ function buildExperienceCardElement(experience) {
     mediaWrap.className = 'exp-media';
 
     media.forEach(function (file) {
-      const fileUrl = file && file.url ? file.url : '#';
+      const fileUrl = file && file.url ? safeMediaUrl(file.url) : '';
+      if (!fileUrl) return;
       const fileName = file && file.filename ? file.filename : 'file';
 
       if (file && file.is_image) {
@@ -85,7 +71,7 @@ function buildExperienceCardElement(experience) {
 
         const img = document.createElement('img');
         img.src = fileUrl;
-        img.alt = sanitizeText(record.title || 'Gallery image');
+        img.alt = record.title || 'Gallery image';
         img.loading = 'lazy';
         img.className = 'exp-thumb';
 
@@ -222,103 +208,3 @@ function buildExperienceCardElement(experience) {
 
   return item;
 }
-
-function renderExperienceList(listEl, experiences) {
-  if (!listEl) return;
-
-  listEl.innerHTML = '';
-
-  if (!Array.isArray(experiences) || experiences.length === 0) {
-    const empty = document.createElement('p');
-    empty.className = 'empty-state';
-    empty.textContent = 'Belum ada pengalaman yang ditambahkan.';
-    listEl.appendChild(empty);
-    return;
-  }
-
-  experiences.forEach(function (experience) {
-    listEl.appendChild(buildExperienceCardElement(experience));
-  });
-}
-
-async function fetchExperienceData(query = '') {
-  const listEl = document.getElementById('experience-list');
-  const apiUrl = listEl?.dataset.apiUrl || '/api/experience/';
-  const url = new URL(apiUrl, window.location.origin);
-  if (query) {
-    url.searchParams.set('title', query);
-  }
-
-  const response = await fetch(url.toString(), {
-    headers: { 'Accept': 'application/json' }
-  });
-
-  if (!response.ok) {
-    throw new Error('Gagal mengambil data experience');
-  }
-
-  return response.json();
-}
-
-function bindExperienceSearch() {
-  const form = document.querySelector('[data-live-search]');
-  const listEl = document.getElementById('experience-list');
-  if (!form || !listEl) return;
-
-  const input = form.querySelector('input[type="search"]');
-  if (!input) return;
-
-  let timer = null;
-  const delay = Number(form.dataset.debounceMs || 450);
-
-  const refresh = function () {
-    const query = input.value.trim();
-    fetchExperienceData(query)
-      .then(function (items) {
-        renderExperienceList(listEl, items);
-      })
-      .catch(function () {
-        const empty = document.createElement('p');
-        empty.className = 'empty-state';
-        empty.textContent = 'Tidak dapat memuat data experience.';
-        listEl.innerHTML = '';
-        listEl.appendChild(empty);
-      });
-  };
-
-  input.addEventListener('input', function () {
-    window.clearTimeout(timer);
-    timer = window.setTimeout(refresh, delay);
-  });
-
-  form.addEventListener('submit', function (event) {
-    event.preventDefault();
-    refresh();
-  });
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-  bindExperienceSearch();
-
-  const listEl = document.getElementById('experience-list');
-  if (!listEl) return;
-
-  const query = new URLSearchParams(window.location.search).get('title') || '';
-  fetchExperienceData(query)
-    .then(function (items) {
-      renderExperienceList(listEl, items);
-    })
-    .catch(function () {
-      const empty = document.createElement('p');
-      empty.className = 'empty-state';
-      empty.textContent = 'Tidak dapat memuat data experience.';
-      listEl.innerHTML = '';
-      listEl.appendChild(empty);
-    });
-});
-
-window.buildExperienceCardElement = buildExperienceCardElement;
-window.escapeHtml = escapeHtml;
-window.sanitizeText = sanitizeText;
-window.fetchExperienceData = fetchExperienceData;
-window.renderExperienceList = renderExperienceList;
