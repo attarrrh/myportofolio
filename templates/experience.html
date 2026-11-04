@@ -12,7 +12,7 @@
     <div class="wrap">
       <div class="list-header">
         <h1 class="section-title">EXPERIENCE</h1>
-        {% if user.is_superuser or perms.main.add_experience %}
+        {% if user.is_superuser %}
         <button type="button" class="button list-add-button"
           popovertarget="add-experience-modal" popovertargetaction="show">
             <span aria-hidden="true">+</span> Tambah Experience
@@ -21,7 +21,7 @@
       </div>
       <p class="section-sub">Activities, organizations, and jobs I have been involved in</p>
       <form method="get" action="{% url 'main:show_experience' %}"
-        class="list-search" data-live-search data-debounce-ms="450">
+        class="list-search" data-live-search data-debounce-ms="300">
           <input type="search"
                  name="title"
                  value="{{ title_query }}"
@@ -32,14 +32,14 @@
       </form>
 
         <ol class="timeline" id="experience-list"
-            aria-live="polite" aria-busy="true" data-list-kind="experience" data-api-url="{% url 'main:get_experience_json' %}"
-            data-can-manage="{% if user.is_superuser or perms.main.change_experience or perms.main.delete_experience %}true{% else %}false{% endif %}">
+            aria-live="polite" aria-busy="true" data-can-delete="{{ user.is_superuser|yesno:'true,false' }}" data-list-kind="experience" data-api-url="{% url 'api:experience-list' %}"
+            data-can-manage="{{ can_edit|yesno:"true,false" }}">
         <li class="empty-state" role="status">Memuat data experience...</li>
       </ol>
     </div>
   </section>
 
-  {% if user.is_superuser or perms.main.add_experience %}
+  {% if user.is_superuser %}
     {% include "components/experience_form_modal.html" with form=form %}
   {% endif %}
 
@@ -48,6 +48,6 @@
 {% endblock content %}
 
 {% block extra_js %}
-  <script src="{% static 'js/experience.js' %}"></script>
-  <script src="{% static 'js/ajax-list.js' %}"></script>
+  <script src="{% static 'js/experience.js' %}?v=tutorial7"></script>
+  <script src="{% static 'js/ajax-list.js' %}?v=tutorial7"></script>
 {% endblock extra_js %}

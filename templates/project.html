@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Projects — Attar{% endblock %}
+{% block content %}
+<main><section class="experience experience-page"><div class="wrap">
+  <div class="list-header"><h1 class="section-title">PROJECTS</h1>
+    {% if user.is_superuser %}<button class="button" type="button" popovertarget="project-modal">Tambah Project</button>{% endif %}
+  </div>
+  <p class="section-sub">Aplikasi dan proyek yang saya kerjakan.</p>
+  <form id="project-search" class="list-search" method="get">
+    <input class="list-search__input" type="search" name="title" value="{{ title_query }}" placeholder="Cari berdasarkan judul" aria-label="Cari project">
+    <button class="button" type="submit">Cari</button>
+  </form>
+  <div id="projects-list" class="gallery-grid" aria-live="polite" aria-busy="true"
+       data-api-url="{% url 'api:project-list' %}" data-owner="{{ user.is_superuser|yesno:'true,false' }}"
+       data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}" data-login-url="{% url 'main:login' %}">
+    <p class="empty-state" role="status">Memuat projects...</p>
+  </div>
+  <div hidden>{% csrf_token %}</div>
+</div></section></main>
+{% if user.is_superuser %}
+<div class="exp-modal" id="project-modal" popover="auto" role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
+  <div class="exp-modal__content">
+    <button type="button" class="exp-modal__close" popovertarget="project-modal" popovertargetaction="hide" aria-label="Tutup form">×</button>
+    <h2 id="project-modal-title">Tambah Project</h2>
+    <form id="project-form" method="post" novalidate>
+      {% csrf_token %}
+      {% for field in form %}<div class="form-group"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</div>{% endfor %}
+      <div class="exp-modal__actions"><button type="button" class="button button-secondary" popovertarget="project-modal" popovertargetaction="hide">Batal</button><button type="submit" class="button">Simpan</button></div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/ajax-list.js' %}?v=tutorial7"></script>
+<script src="{% static 'js/projects.js' %}?v=tutorial7"></script>
+{% endblock %}

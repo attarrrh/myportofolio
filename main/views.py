@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 from django.template.defaultfilters import date as date_filter
 
 from main.models import Experience, ExperienceMedia, GalleryItem
-from main.forms import ExperienceForm, GalleryItemForm
+from main.forms import ExperienceForm, GalleryItemForm, ProjectForm
 
 
 def user_can_manage_experience(user):
@@ -20,6 +20,7 @@ def user_can_manage_experience(user):
         or user.has_perm("main.add_experience")
         or user.has_perm("main.change_experience")
         or user.has_perm("main.delete_experience")
+        or (user.is_authenticated and user.groups.filter(name="Editor").exists())
     )
 
 
@@ -29,6 +30,7 @@ def user_can_manage_gallery(user):
         or user.has_perm("main.add_galleryitem")
         or user.has_perm("main.change_galleryitem")
         or user.has_perm("main.delete_galleryitem")
+        or (user.is_authenticated and user.groups.filter(name="Editor").exists())
     )
 
 
@@ -110,6 +112,7 @@ def show_experience(request):
         "name": "Attar",
         "title_query": request.GET.get("title", "").strip(),
         "form": ExperienceForm(),
+        "can_edit": user_can_manage_experience(request.user),
     })
 
 
@@ -118,6 +121,14 @@ def show_about(request):
         "name": "Attar Rais Hakam",
         "title_query": request.GET.get("title", "").strip(),
         "form": GalleryItemForm(),
+        "can_edit": user_can_manage_gallery(request.user),
+    })
+
+
+def show_projects(request):
+    return render(request, "project.html", {
+        "name": "Attar", "form": ProjectForm(),
+        "title_query": request.GET.get("title", "").strip(),
     })
 
 
@@ -181,7 +192,7 @@ def update_experience(request, experience_id):
 
 @login_required(login_url="/login/")
 def delete_experience(request, experience_id):
-    if not user_can_manage_experience(request.user):
+    if not (request.user.is_superuser or request.user.has_perm("main.delete_experience")):
         raise PermissionDenied
 
     experience = get_object_or_404(Experience, pk=experience_id)
@@ -249,7 +260,7 @@ def create_gallery_item_ajax(request):
 
 @login_required(login_url="/login/")
 def delete_gallery_item(request, item_id):
-    if not user_can_manage_gallery(request.user):
+    if not (request.user.is_superuser or request.user.has_perm("main.delete_galleryitem")):
         raise PermissionDenied
     
     item = get_object_or_404(GalleryItem, pk=item_id)

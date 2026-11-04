@@ -5,7 +5,14 @@ from html import unescape
 from django.forms import ModelForm, TextInput, Textarea, URLInput, Select, DateTimeInput, ClearableFileInput, FileField
 from django.utils.html import strip_tags
 from django.core.exceptions import ValidationError
-from main.models import Experience, GalleryItem
+from main.models import Experience, GalleryItem, Project
+
+
+class ProjectForm(ModelForm):
+    class Meta:
+        model = Project
+        fields = ["title", "description", "tech_stack", "project_url", "project_image_url"]
+        widgets = {"description": Textarea(attrs={"rows": 4})}
 
 
 def sanitize_html_text(value):

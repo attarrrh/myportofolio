@@ -6,6 +6,7 @@ from main.views import (
     delete_experience_media,
     login_user,
     show_main,
+    show_projects,
     show_experience,
     show_about,
     create_experience,
@@ -26,6 +27,7 @@ app_name = "main"
 
 urlpatterns = [
     path("", show_main, name="show_main"),
+    path("projects/", show_projects, name="show_projects"),
     path("experience/", show_experience, name="show_experience"),
     path("about/", show_about, name="show_about"),
     path("experience/add/", create_experience, name="create_experience"),

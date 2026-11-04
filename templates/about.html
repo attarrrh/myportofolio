@@ -11,7 +11,7 @@
     <div class="wrap">
       <div class="list-header">
         <h1 class="section-title">ABOUT ME</h1>
-        {% if user.is_superuser or perms.main.add_galleryitem %}
+        {% if user.is_superuser %}
         <button type="button" class="button list-add-button"
           popovertarget="add-gallery-item-modal" popovertargetaction="show">
             <span aria-hidden="true">+</span> Tambah Item
@@ -20,7 +20,7 @@
       </div>
       <p class="section-sub">Photo, Video of My Life</p>
 
-      <form method="get" action="{% url 'main:show_about' %}" class="list-search" data-live-search data-debounce-ms="450">
+      <form method="get" action="{% url 'main:show_about' %}" class="list-search" data-live-search data-debounce-ms="300">
           <input type="search"
                  name="title"
                  value="{{ title_query }}"
@@ -32,15 +32,15 @@
       </form>
 
       <div class="gallery-grid" id="gallery-list" aria-live="polite" aria-busy="true"
-           data-list-kind="gallery" data-api-url="{% url 'main:get_gallery_json' %}"
+           data-can-delete="{{ user.is_superuser|yesno:'true,false' }}" data-list-kind="gallery" data-api-url="{% url 'api:gallery-list' %}"
            data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}"
-           data-can-manage="{% if user.is_superuser or perms.main.change_galleryitem or perms.main.delete_galleryitem %}true{% else %}false{% endif %}">
+           data-can-manage="{{ can_edit|yesno:"true,false" }}">
         <p class="empty-state" role="status">Memuat data galeri...</p>
       </div>
     </div>
   </section>
 
-  {% if user.is_superuser or perms.main.add_galleryitem %}
+  {% if user.is_superuser %}
     {% include "components/gallery_item_form_modal.html" with form=form %}
   {% endif %}
 
@@ -49,6 +49,6 @@
 {% endblock content %}
 
 {% block extra_js %}
-  <script src="{% static 'js/experience.js' %}"></script>
-  <script src="{% static 'js/ajax-list.js' %}"></script>
+  <script src="{% static 'js/experience.js' %}?v=tutorial7"></script>
+  <script src="{% static 'js/ajax-list.js' %}?v=tutorial7"></script>
 {% endblock extra_js %}

@@ -120,7 +120,7 @@ class AboutTest(TestCase):
 
         self.assertContains(response, 'id="add-gallery-item-modal"')
         self.assertContains(response, 'id="gallery-item-form"')
-        self.assertContains(response, reverse("main:create_gallery_item_ajax"))
+        self.assertContains(response, reverse("api:gallery-list"))
 
     def test_superuser_can_create_gallery_item_with_ajax(self):
         user = get_user_model().objects.create_superuser(

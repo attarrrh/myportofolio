@@ -19,12 +19,36 @@ function getCsrfToken() {
   return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
 }
 
+function apiErrorMessage(data) {
+  if (!data || typeof data !== 'object') return 'Permintaan gagal.';
+  if (data.detail) return String(data.detail);
+  return Object.entries(data).map(([field, errors]) =>
+    `${field}: ${Array.isArray(errors) ? errors.join(', ') : String(errors)}`
+  ).join('\n');
+}
+
+async function writeResource(url, method, payload) {
+  const headers = {Accept: 'application/json', 'X-CSRFToken': getCsrfToken()};
+  const options = {method, headers, credentials: 'same-origin'};
+  if (payload instanceof FormData) options.body = payload;
+  else if (payload !== undefined) {
+    headers['Content-Type'] = 'application/json';
+    options.body = JSON.stringify(payload);
+  }
+  const response = await fetch(url, options);
+  if (response.status === 204) return null;
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(data ? apiErrorMessage(data) : `HTTP ${response.status}`);
+  if (data === null) throw new Error('Server tidak mengembalikan JSON.');
+  return data;
+}
+
 function buildGalleryCard(item, list) {
-  const record = item.fields;
-  const pk = encodeURIComponent(item.pk);
+  const record = item;
+  const pk = encodeURIComponent(item.id);
   const card = listElement('div', 'gallery-card');
   const media = listElement('div', 'gallery-media');
-  const source = safeMediaUrl(record.media_url);
+  const source = safeMediaUrl(record.display_url || record.media_url);
   if (source) {
     const visual = document.createElement(record.media_type === 'video' ? 'video' : 'img');
     visual.src = source;
@@ -57,12 +81,7 @@ function buildGalleryCard(item, list) {
   star.addEventListener('click', async function () {
     star.disabled = true;
     try {
-      const response = await fetch(`/about/${pk}/like/`, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': getCsrfToken(), 'Accept': 'application/json' }
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message || 'Gagal memperbarui star.');
+      const result = await writeResource(`${list.dataset.apiUrl}${pk}/star/`, 'POST');
       updateStar(result);
     } catch (error) {
       showToast('Gagal memperbarui star', error.message, 'error');
@@ -87,10 +106,19 @@ function buildGalleryCard(item, list) {
     const remove = listElement('button', 'button button-danger', 'Hapus');
     remove.type = 'submit';
     form.append(token, remove);
-    form.addEventListener('submit', function (event) {
-      if (!window.confirm(`Hapus ${record.title}?`)) event.preventDefault();
+    info.append(actions);
+    if (list.dataset.canDelete === 'true') info.append(form);
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      if (remove.disabled || !window.confirm(`Hapus ${record.title}?`)) return;
+      remove.disabled = true;
+      try {
+        await writeResource(`${list.dataset.apiUrl}${pk}/`, 'DELETE');
+        list.dispatchEvent(new Event('portfolio:refresh'));
+        showToast('Sukses', 'Item dihapus.', 'success');
+      } catch (error) { showToast('Gagal menghapus', error.message, 'error'); }
+      finally { remove.disabled = false; }
     });
-    info.append(actions, form);
   }
   card.append(media, info);
   return card;
@@ -152,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function () {
   input.addEventListener('input', function () {
     clearTimeout(timer);
     controller?.abort();
-    timer = setTimeout(refresh, Number(search.dataset.debounceMs || 450));
+    timer = setTimeout(refresh, Number(search.dataset.debounceMs || 300));
   });
   search.addEventListener('submit', function (event) {
     event.preventDefault();
@@ -167,28 +195,23 @@ document.addEventListener('DOMContentLoaded', function () {
     if (submit.disabled) return;
     submit.disabled = true;
     try {
-      const response = await fetch(form.dataset.ajaxUrl, {
-        method: 'POST',
-        body: new FormData(form),
-        headers: { 'X-CSRFToken': getCsrfToken(), 'Accept': 'application/json' }
-      });
-      const result = await response.json();
-      if (!response.ok) {
-        const errors = Object.values(result.errors || {}).flat().map(error => error.message || error).join('\n');
-        showToast('Gagal menambahkan data', errors || result.message || 'Periksa kembali isian form.', 'error');
-        return;
+      const body = new FormData(form);
+      body.delete('csrfmiddlewaretoken');
+      for (const [key, value] of [...body.entries()]) {
+        if (value instanceof File && !value.name) body.delete(key);
       }
+      await writeResource(form.dataset.ajaxUrl, 'POST', body);
       form.closest('[popover]')?.hidePopover();
       form.reset();
-      input.value = '';
       clearTimeout(timer);
       const loaded = await refresh();
-      showToast('Sukses', result.message + (loaded ? '' : ' Daftar gagal dimuat, silakan coba cari kembali.'), 'success');
-    } catch (_) {
-      showToast('Gagal menambahkan data', 'Permintaan gagal. Periksa daftar sebelum mencoba lagi.', 'error');
+      showToast('Sukses', 'Data berhasil ditambahkan.' + (loaded ? '' : ' Daftar gagal dimuat.'), 'success');
+    } catch (error) {
+      showToast('Gagal menambahkan data', error.message, 'error');
     } finally {
       submit.disabled = false;
     }
   });
+  list.addEventListener('portfolio:refresh', refresh);
   refresh();
 });

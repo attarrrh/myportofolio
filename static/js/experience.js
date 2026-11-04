@@ -176,6 +176,18 @@ function buildExperienceCardElement(experience) {
 
     form.appendChild(csrf);
     form.appendChild(confirmDelete);
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (confirmDelete.disabled) return;
+      confirmDelete.disabled = true;
+      try {
+        const list = document.getElementById('experience-list');
+        await writeResource(`${list.dataset.apiUrl}${encodeURIComponent(pk)}/`, 'DELETE');
+        list.dispatchEvent(new Event('portfolio:refresh'));
+        showToast('Sukses', 'Experience dihapus.', 'success');
+      } catch (error) { showToast('Gagal menghapus', error.message, 'error'); }
+      finally { confirmDelete.disabled = false; }
+    });
     modalActions.appendChild(cancelButton);
     modalActions.appendChild(form);
 
@@ -195,10 +207,11 @@ function buildExperienceCardElement(experience) {
     deleteButton.textContent = 'Hapus';
 
     actions.appendChild(editLink);
-    actions.appendChild(deleteButton);
+    const canDelete = document.getElementById('experience-list')?.dataset.canDelete === 'true';
+    if (canDelete) actions.appendChild(deleteButton);
 
     content.appendChild(actions);
-    content.appendChild(deleteWrap);
+    if (canDelete) content.appendChild(deleteWrap);
   }
 
   details.appendChild(content);

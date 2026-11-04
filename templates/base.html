@@ -45,6 +45,7 @@
       <nav class="main-nav" id="mainNav" aria-label="Navigasi utama">
         <a href="{% url 'main:show_main' %}">Profile</a>
         <a href="{% url 'main:show_experience' %}">Experience</a>
+        <a href="{% url 'main:show_projects' %}">Projects</a>
         <a href="{% url 'main:show_about' %}">About Me</a>
         {% if user.is_authenticated %}
             <span class="nav-user">{{ user.username }}</span>

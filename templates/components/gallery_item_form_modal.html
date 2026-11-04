@@ -21,7 +21,7 @@
         <form id="gallery-item-form"
               method="post"
               action="{% url 'main:create_gallery_item' %}"
-              data-ajax-url="{% url 'main:create_gallery_item_ajax' %}"
+              data-ajax-url="{% url 'api:gallery-list' %}"
               enctype="multipart/form-data">
             {% csrf_token %}
             {% for field in form %}
