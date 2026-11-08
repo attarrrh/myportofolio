@@ -98,6 +98,12 @@ class GalleryItemForm(ModelForm):
     VIDEO_EXT = {".mp4", ".webm", ".mov"}
     MAX_SIZE = 25 * 1024 * 1024  # 25 MB
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Existing gallery entries may use a URL instead of an uploaded file.
+        if self.instance.media_url:
+            self.fields["media_file"].required = False
+
     class Meta:
         model = GalleryItem
         fields = ["title", "caption", "media_type", "category", "media_file"]

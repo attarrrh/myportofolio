@@ -208,12 +208,16 @@ class EditorPermissionTest(TestCase):
     def test_editor_with_manage_permission_can_access_experience_form(self):
         self.client.login(username="editor", password="securepass123")
         response = self.client.get(reverse("main:create_experience"))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 403)
+        experience = Experience.objects.create(title="Edit", description="Details")
+        self.assertEqual(self.client.get(reverse("main:update_experience", args=[experience.pk])).status_code, 200)
 
     def test_editor_with_manage_permission_can_access_about_form(self):
         self.client.login(username="editor", password="securepass123")
         response = self.client.get(reverse("main:create_gallery_item"))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 403)
+        item = GalleryItem.objects.create(title="Edit", media_url="https://example.com/a.jpg")
+        self.assertEqual(self.client.get(reverse("main:update_gallery_item", args=[item.pk])).status_code, 200)
 
 
 class AjaxChecklistTest(TestCase):
@@ -252,7 +256,7 @@ class AjaxChecklistTest(TestCase):
         change_only.user_permissions.set(Permission.objects.filter(
             codename__in=["change_experience", "change_galleryitem"], content_type__app_label="main"
         ))
-        for user in [None, self.viewer, change_only]:
+        for user in [None, self.viewer, self.editor, change_only]:
             self.client.logout()
             if user:
                 self.client.force_login(user)
@@ -261,9 +265,9 @@ class AjaxChecklistTest(TestCase):
                 self.assertEqual(response.status_code, 403)
                 self.assertIn("message", response.json())
 
-    def test_create_validates_and_returns_201_for_editor_and_admin(self):
+    def test_create_validates_and_returns_201_for_owner(self):
         with tempfile.TemporaryDirectory() as media_root, override_settings(MEDIA_ROOT=media_root):
-            for user in [self.editor, self.admin]:
+            for user in [self.admin]:
                 self.client.force_login(user)
                 for endpoint in ["create_experience_ajax", "create_gallery_item_ajax"]:
                     url = reverse("main:" + endpoint)
@@ -285,7 +289,7 @@ class AjaxChecklistTest(TestCase):
 
     def test_post_requires_real_csrf_token(self):
         client = Client(enforce_csrf_checks=True)
-        client.force_login(self.editor)
+        client.force_login(self.admin)
         page = client.get(reverse("main:show_experience"))
         self.assertEqual(page.status_code, 200)
         token = client.cookies["csrftoken"].value

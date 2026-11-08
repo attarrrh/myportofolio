@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.template.defaultfilters import date as date_filter
+from django.utils.html import strip_tags
 from rest_framework import serializers
 
 from main.forms import ExperienceForm, GalleryItemForm, sanitize_html_text
@@ -8,7 +9,7 @@ from main.models import Experience, ExperienceMedia, GalleryItem, Project
 
 class CleanTextSerializer(serializers.ModelSerializer):
     def validate_title(self, value):
-        value = sanitize_html_text(value)
+        value = strip_tags(sanitize_html_text(value)).strip()
         if not value:
             raise serializers.ValidationError("Title cannot be empty.")
         return value
@@ -42,10 +43,10 @@ class ProjectSerializer(StarFieldsMixin, CleanTextSerializer):
         read_only_fields = ["id"]
 
     def validate_description(self, value):
-        return sanitize_html_text(value)
+        return strip_tags(sanitize_html_text(value)).strip()
 
     def validate_tech_stack(self, value):
-        return sanitize_html_text(value)
+        return strip_tags(sanitize_html_text(value)).strip()
 
 
 class GalleryItemSerializer(StarFieldsMixin, CleanTextSerializer):
@@ -72,7 +73,7 @@ class GalleryItemSerializer(StarFieldsMixin, CleanTextSerializer):
         return request.build_absolute_uri(obj.media_file.url) if request else obj.media_file.url
 
     def validate_caption(self, value):
-        return sanitize_html_text(value)
+        return strip_tags(sanitize_html_text(value)).strip()
 
     def validate(self, attrs):
         file = attrs.get("media_file")
@@ -102,7 +103,15 @@ class ExperienceMediaSerializer(serializers.ModelSerializer):
         fields = ["id", "url", "filename", "is_image", "is_video"]
 
 
+class OptionalDateTimeField(serializers.DateTimeField):
+    """An empty datetime-local input in multipart means no date, just like ModelForm."""
+
+    def to_internal_value(self, value):
+        return None if value == "" else super().to_internal_value(value)
+
+
 class ExperienceSerializer(CleanTextSerializer):
+    ended_at = OptionalDateTimeField(required=False, allow_null=True)
     category_display = serializers.CharField(source="get_category_display", read_only=True)
     is_ongoing = serializers.BooleanField(read_only=True)
     started = serializers.SerializerMethodField()
@@ -117,7 +126,7 @@ class ExperienceSerializer(CleanTextSerializer):
         read_only_fields = ["id"]
 
     def validate_description(self, value):
-        value = sanitize_html_text(value)
+        value = strip_tags(sanitize_html_text(value)).strip()
         if not value:
             raise serializers.ValidationError("Description cannot be empty.")
         return value

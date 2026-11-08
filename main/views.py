@@ -17,9 +17,7 @@ from main.forms import ExperienceForm, GalleryItemForm, ProjectForm
 def user_can_manage_experience(user):
     return (
         user.is_superuser
-        or user.has_perm("main.add_experience")
         or user.has_perm("main.change_experience")
-        or user.has_perm("main.delete_experience")
         or (user.is_authenticated and user.groups.filter(name="Editor").exists())
     )
 
@@ -27,9 +25,7 @@ def user_can_manage_experience(user):
 def user_can_manage_gallery(user):
     return (
         user.is_superuser
-        or user.has_perm("main.add_galleryitem")
         or user.has_perm("main.change_galleryitem")
-        or user.has_perm("main.delete_galleryitem")
         or (user.is_authenticated and user.groups.filter(name="Editor").exists())
     )
 
@@ -134,7 +130,7 @@ def show_projects(request):
 
 @login_required(login_url="/login/")
 def create_experience(request):
-    if not request.user.has_perm("main.add_experience"):
+    if not request.user.is_superuser:
         raise PermissionDenied
 
     form = ExperienceForm(request.POST or None, request.FILES or None)
@@ -152,7 +148,7 @@ def create_experience(request):
 @require_POST
 def create_experience_ajax(request):
     user = request.user
-    if not (user.is_authenticated and user.has_perm("main.add_experience")):
+    if not (user.is_authenticated and user.is_superuser):
         return JsonResponse(
             {"message": "Kamu tidak punya izin untuk menambahkan experience."},
             status=403,
@@ -192,7 +188,7 @@ def update_experience(request, experience_id):
 
 @login_required(login_url="/login/")
 def delete_experience(request, experience_id):
-    if not (request.user.is_superuser or request.user.has_perm("main.delete_experience")):
+    if not request.user.is_superuser:
         raise PermissionDenied
 
     experience = get_object_or_404(Experience, pk=experience_id)
@@ -208,7 +204,7 @@ def delete_experience(request, experience_id):
 
 @login_required(login_url="/login/")
 def delete_experience_media(request, media_id):
-    if not user_can_manage_experience(request.user):
+    if not request.user.is_superuser:
         raise PermissionDenied
 
     media = get_object_or_404(ExperienceMedia, pk=media_id)
@@ -223,7 +219,7 @@ def delete_experience_media(request, media_id):
 
 @login_required(login_url="/login/")
 def create_gallery_item(request):
-    if not request.user.has_perm("main.add_galleryitem"):
+    if not request.user.is_superuser:
         raise PermissionDenied
 
     form = GalleryItemForm(request.POST or None, request.FILES or None)
@@ -240,7 +236,7 @@ def create_gallery_item(request):
 @require_POST
 def create_gallery_item_ajax(request):
     user = request.user
-    if not (user.is_authenticated and user.has_perm("main.add_galleryitem")):
+    if not (user.is_authenticated and user.is_superuser):
         return JsonResponse(
             {"message": "Kamu tidak punya izin untuk menambahkan item galeri."},
             status=403,
@@ -260,7 +256,7 @@ def create_gallery_item_ajax(request):
 
 @login_required(login_url="/login/")
 def delete_gallery_item(request, item_id):
-    if not (request.user.is_superuser or request.user.has_perm("main.delete_galleryitem")):
+    if not request.user.is_superuser:
         raise PermissionDenied
     
     item = get_object_or_404(GalleryItem, pk=item_id)

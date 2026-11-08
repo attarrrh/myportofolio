@@ -59,11 +59,11 @@ menggunakan ai untuk membantu memahami alur rancangan penugasan serta keterkaita
 #TUGAS 5
 1. Jelaskan apa itu debouncing dan mengapa teknik ini penting diterapkan pada fitur pencarian yang menggunakan AJAX!
 
-debouncing itu semacam ngasih jeda sebelum menjalankan proses, jadi setiap user mengetik timer sebelumnya dibatalin terus mulai lagi dari awal, di project ini aku pakai jeda 450 ms jadi request pencarian baru dikirim setelah user berhenti mengetik selama waktu tersebut. kenapa penting, karena kalo setiap huruf langsung ngirim request bakal banyak request yang sebenernya ga perlu, misalnya pas mau ngetik research malah ngirim pencarian dari r, re, res dan seterusnya, jadinya lebih berat buat server dan tampilan juga bisa berubah ubah terus, dengan debouncing pencarian jadi lebih efisien dan enak dipakai
+debouncing itu semacam ngasih jeda sebelum menjalankan proses, jadi setiap user mengetik timer sebelumnya dibatalin terus mulai lagi dari awal, di project ini aku pakai jeda 450 ms jadi request pencarian baru dikirim setelah user berhenti mengetik selama waktu tersebut. ini biar kalo setiap huruf langsung ngirim request bakal banyak request yang sebenernya ga perlu, misalnya pas mau ngetik research malah ngirim pencarian dari r, re, res dan seterusnya, jadinya lebih berat buat server dan tampilan juga bisa berubah ubah terus, dengan debouncing pencarian jadi lebih efisien dan enak dipakai
 
 2. Jelaskan fungsi dari penggunaan await ketika kita menggunakan fetch()! Apa yang akan terjadi jika kita tidak menggunakan await?
 
-fetch itu proses asynchronous yang hasil awalnya berupa Promise, await dipakai untuk menunggu Promise tersebut selesai sebelum lanjut ke baris berikutnya dalam fungsi async, jadi response yang kita terima sudah berupa object Response yang bisa dicek statusnya, setelah itu response.json() juga perlu ditunggu karena proses membaca dan mengubah isi respons jadi object javascript juga asynchronous. selama nunggu bukan berarti seluruh browser berhenti, yang ditunda cuma kelanjutan fungsi tersebut
+fetch itu proses asynchronous yang hasil awalnya berupa Promise, await dipakai untuk menunggu Promise tersebut selesai sebelum lanjut ke baris berikutnya dalam fungsi async, jadi response yang kita terima sudah berupa object Response yang bisa dicek statusnya, setelah itu response.json() juga perlu ditunggu karena proses membaca dan mengubah isi respons jadi object javascript juga asynchronous
 
 kalo ga pakai await dan hasil fetch langsung dipakai seolah olah sudah berupa Response, yang kita pegang masih Promise jadi response.json() bakal eror karena method tersebut bukan milik Promise. sebenernya tetap bisa tanpa await dengan memakai .then() dan .catch(), yang penting hasil requestnya tetap ditangani setelah prosesnya selesai
 
@@ -73,8 +73,41 @@ XSS itu serangan ketika input dari user berisi kode berbahaya lalu masuk ke hala
 
 data lewat AJAX sebenernya ga otomatis berbahaya karena JSON sendiri cuma data, masalahnya muncul pas javascript menyisipkan nilai tersebut ke HTML misalnya lewat innerHTML tanpa escaping, browser bisa menganggap input tadi sebagai markup dan menjalankan kode di dalamnya. sementara template Django secara default punya autoescaping untuk nilai teks sehingga karakter seperti < dan > ditampilkan sebagai teks, jadi perlindungan ini harus kita tangani sendiri saat menyusun tampilan lewat javascript
 
-di project ini aku pakai textContent untuk menampilkan nilai teks supaya input ga dianggap sebagai HTML, terus input judul, deskripsi dan caption dibersihkan di method clean pada ModelForm menggunakan strip_tags, tapi pembersihan server ini tetap perlu dibarengi cara menampilkan data yang aman di browser, terutama kalo ada data lama yang belum dibersihkan
+disinii pakai textContent untuk menampilkan nilai teks supaya input ga dianggap sebagai HTML, terus input judul, deskripsi dan caption dibersihkan di method clean pada ModelForm menggunakan strip_tags, tapi pembersihan server ini tetap perlu dibarengi cara menampilkan data yang aman di browser, terutama kalo ada data lama yang belum dibersihkan
 
 
 AI
 menggunakan ai untuk membantu memeriksa kesesuaian project dengan checklist tugas, membantu evaluasi halaman experience dan about agar pengambilan data, pencarian sesuai framework AJAX, membantu penerapan debouncing, serta pengecekan permission dan perlindungan XSS, juga membantu proses testing
+
+
+#TUGAS 6
+
+1. Jelaskan apa yang dimaksud dengan REST dan mengapa mengembalikan JSON saja belum cukup untuk menyebut sebuah API sebagai RESTful! Jelaskan pula perbedaan PUT dan PATCH beserta contoh kapan masing-masing sebaiknya digunakan!
+
+REST itu gaya arsitektur untuk menyusun komunikasi antara client dan server, dimana data dianggap sebagai resource dan tindakan terhadap data tersebut dibedakan lewat method HTTP. misalnya di project ini `/api/v1/gallery/` menunjuk kumpulan item galeri, GET dipakai buat membaca sedangkan POST buat menambah, kemudian `/api/v1/gallery/<uuid>/` menunjuk satu item yang bisa diubah atau dihapus
+
+kalo cuma ngembaliin JSON belum tentu RESTful karena JSON itu format datanya aja, sementara REST juga berhubungan dengan cara menyusun resource, penggunaan method, status HTTP dan prinsip stateless, jadi bukan sekadar asal response bentuknya JSON. pada tutorial ini kita masih memakai session login Django sehingga bukan implementasi REST yang sepenuhnya stateless, tapi pengaturan resource dan kontrak API-nya tetap mengikuti pola REST yang dipelajari
+
+PUT dipakai ketika ingin mengganti representasi data secara lengkap, jadi field wajib perlu dikirim lagi, misalnya mengganti judul, tipe media dan seluruh informasi yang diperlukan pada item galeri. PATCH dipakai ketika cuma mau mengubah sebagian, misalnya hanya mengganti caption tanpa mengirim ulang judul atau foto, makanya form edit di project ini memakai PATCH supaya file lama tetap dipertahankan kalo ga ada upload baru
+
+2. Jelaskan peran serializer pada Django REST Framework! Apa keuntungannya dibandingkan merakit dictionary secara manual dengan JsonResponse seperti pada Tutorial 05?
+
+serializer itu penerjemah sekaligus pemeriksa data, saat GET dia mengubah object model jadi tipe data python yang bisa dirender ke JSON, sedangkan saat POST atau PATCH dia membaca input, melakukan validasi lalu menyimpan jika datanya valid. hasil serializer belum langsung berupa string JSON, proses menjadikannya isi response dilakukan renderer DRF
+
+sebelumnya kita perlu menyusun dictionary satu persatu dan memisahkan validasi lewat ModelForm, sekarang dengan ModelSerializer field bisa diturunkan dari model dan dipilih secara eksplisit, aturan input bisa ditulis di validate_title atau validate_caption, terus jumlah star dan status star bisa ditambahkan sebagai field hasil perhitungan yang read-only. jadinya lebih rapih dan ga perlu mengulang susunan data maupun validasi di setiap view, tapi validasi form lama ga otomatis dijalankan serializer jadi aturan yang diperlukan tetap harus ditulis pada jalur API
+
+3. Jelaskan perbedaan autentikasi dan otorisasi pada Django REST Framework! Mengapa hak akses harus diperiksa dengan permission class di server, bukan hanya dengan menyembunyikan tombol di template?
+
+autentikasi itu mengenali siapa yang mengirim request, di project ini SessionAuthentication memakai session login Django untuk mengisi request.user. otorisasi itu tahap sesudahnya yaitu memeriksa user tersebut boleh melakukan apa, misalnya pengguna biasa boleh star tapi ga boleh edit, Editor boleh PUT/PATCH tapi ga boleh create/delete, sementara superuser boleh mengelola semuanya
+
+menyembunyikan tombol cuma membantu tampilan, bukan membatasi request yang masuk. walaupun tombol hapus ga muncul, user masih bisa mengirim DELETE sendiri lewat console atau aplikasi lain, jadi permission class di server tetap harus menolak sebelum perubahan dijalankan. view lama juga perlu mengikuti aturan yang sama supaya pembatasan di API ga bisa dilewati lewat alamat form lama
+
+4. Jelaskan mengapa permintaan yang mengubah data tetap memerlukan token CSRF ketika API memakai SessionAuthentication! Mengapa test yang memakai force_authenticate tidak cukup untuk membuktikan bahwa perlindungan CSRF berjalan?
+
+karena browser otomatis menyertakan cookie session saat mengirim request yang sesuai, ada risiko user yang sedang login diarahkan untuk mengirim request dari situs lain tanpa sadar. walaupun body request berbentuk JSON atau endpointnya memakai DRF, session tetap dipakai untuk mengenali user, jadi permintaan yang mengubah data tetap perlu token CSRF yang diperiksa server, disini dikirim melalui header X-CSRFToken termasuk saat memberi star
+
+force_authenticate itu jalan pintas untuk menentukan user saat test, dia ga menjalankan alur autentikasi session sungguhan sehingga ga cukup buat membuktikan CSRF berfungsi. karena itu dipakai APIClient(enforce_csrf_checks=True) dan .login(), lalu dicoba request tanpa token yang harus ditolak 403 dan database tetap sama, setelah token diambil dari halaman, request yang punya izin dan token valid bisa berhasil. dengan begitu yang diuji bukan cuma permission, tapi juga perlindungan CSRF pada session yang sebenarnya
+
+
+AI
+menggunakan ai untuk membantu mengecek checklist Tugas 6 terhadap kode Tutorial 7 dan bagaimana penerapan apa yang sebelumnya dikerjakan pada tutorial 7 kedalam tugas 6 ini. kemudian ai juga digunakan untuk merancang alur perubahan serta membantu evaluasi code akhir, juga membantu memenuhi testing yang masih kurang.

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block meta %}
     <title>{% if experience %}Edit{% else %}Add{% endif %} Experience - {{ name }}</title>
 {% endblock meta %}
@@ -9,6 +10,9 @@
                 <h1>{% if experience %}Edit Experience{% else %}Add New Experience{% endif %}</h1>
                 <form method="post"
                       action="{% if experience %}{% url 'main:update_experience' experience.id %}{% else %}{% url 'main:create_experience' %}{% endif %}"
+                      data-api-form
+                      data-api-method="{% if experience %}PATCH{% else %}POST{% endif %}"
+                      data-api-url="{% if experience %}{% url 'api:experience-detail' experience.id %}{% else %}{% url 'api:experience-list' %}{% endif %}"
                       class="project-form"
                       enctype="multipart/form-data">
                     {% csrf_token %}
@@ -33,10 +37,12 @@
                     {% for m in experience.media.all %}
                         <div class="media-manage__item">
                             <span>{{ m.filename }}</span>
+                            {% if user.is_superuser %}
                             <form method="post" action="{% url 'main:delete_experience_media' m.id %}">
                                 {% csrf_token %}
                                 <button type="submit" class="button button-danger">Hapus</button>
                             </form>
+                            {% endif %}
                         </div>
                     {% empty %}
                         <p class="empty-state">Belum ada file.</p>
@@ -47,3 +53,7 @@
         </section>
     </main>
 {% endblock content %}
+{% block extra_js %}
+  <script src="{% static 'js/ajax-list.js' %}?v=tugas6"></script>
+  <script src="{% static 'js/resource-form.js' %}?v=tugas6"></script>
+{% endblock extra_js %}

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block meta %}
     <title>{% if item %}Edit{% else %}Add{% endif %} Gallery Item - {{ name }}</title>
 {% endblock meta %}
@@ -9,6 +10,9 @@
                 <h1>{% if item %}Edit Gallery Item{% else %}Add New Gallery Item{% endif %}</h1>
                 <form method="post"
                       action="{% if item %}{% url 'main:update_gallery_item' item.id %}{% else %}{% url 'main:create_gallery_item' %}{% endif %}"
+                      data-api-form
+                      data-api-method="{% if item %}PATCH{% else %}POST{% endif %}"
+                      data-api-url="{% if item %}{% url 'api:gallery-detail' item.id %}{% else %}{% url 'api:gallery-list' %}{% endif %}"
                       class="project-form"
                       enctype="multipart/form-data">
                     {% csrf_token %}
@@ -30,3 +34,7 @@
         </section>
     </main>
 {% endblock content %}
+{% block extra_js %}
+  <script src="{% static 'js/ajax-list.js' %}?v=tugas6"></script>
+  <script src="{% static 'js/resource-form.js' %}?v=tugas6"></script>
+{% endblock extra_js %}

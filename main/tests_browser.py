@@ -100,3 +100,108 @@ class Tutorial7BrowserTest(StaticLiveServerTestCase):
                 expect(page.locator("#experience-list")).to_contain_text("Browser experience")
                 browser.close()
         self.assertEqual(errors, [])
+
+    def test_assignment6_gallery_edit_star_errors_and_delete_without_reload(self):
+        from playwright.sync_api import expect, sync_playwright
+
+        sessions = {}
+        for role, user in (("owner", self.owner), ("viewer", self.viewer), ("editor", self.editor)):
+            client = Client()
+            client.force_login(user)
+            sessions[role] = client.cookies[settings.SESSION_COOKIE_NAME].value
+        # Old data must also be rendered as text, even if it bypassed the serializer.
+        self.gallery.caption = '<img src=x onerror="window.xssExecuted=true">'
+        self.gallery.save()
+        with tempfile.TemporaryDirectory() as media, override_settings(MEDIA_ROOT=media):
+            with sync_playwright() as automation:
+                browser = automation.chromium.launch(channel="chrome", headless=True)
+                context = browser.new_context()
+                context.route("https://**/*", lambda route: route.abort())
+                page = context.new_page()
+                errors, writes = [], []
+                page.on("pageerror", lambda error: errors.append(str(error)))
+                page.on("request", lambda request: writes.append(request) if request.method in ("POST", "PATCH", "DELETE") else None)
+
+                def login(role):
+                    context.add_cookies([{"name": settings.SESSION_COOKIE_NAME, "value": sessions[role], "url": self.live_server_url}])
+
+                login("owner")
+                page.goto(self.live_server_url + "/about/")
+                expect(page.locator("#gallery-list")).to_contain_text(self.gallery.caption)
+                expect(page.locator(".gallery-info p img")).to_have_count(0)
+                self.assertIsNone(page.evaluate("window.xssExecuted"))
+
+                # A URL-only item can be edited without forcing a new file upload.
+                page.get_by_role("link", name="Edit", exact=True).click()
+                edit = page.locator('[data-api-form]')
+                expect(edit.locator('[name="media_file"]')).not_to_have_attribute("required", "")
+                page.evaluate("window.documentMarker = 'unchanged'")
+                edit.locator('[name="caption"]').fill("<b>Edited by owner</b>")
+                edit.get_by_role("button", name="Simpan Perubahan").click()
+                expect(page.locator("#toast-title")).to_have_text("Sukses")
+                self.assertEqual(page.evaluate("window.documentMarker"), "unchanged")
+
+                page.goto(self.live_server_url + "/about/")
+                expect(page.locator("#gallery-list")).to_contain_text("Edited by owner")
+                page.get_by_role("button", name="Tambah Item", exact=True).click()
+                form = page.locator("#gallery-item-form")
+                form.locator('[name="title"]').fill("<b>Assignment gallery</b>")
+                form.locator('[name="media_file"]').set_input_files({"name": "assignment.jpg", "mimeType": "image/jpeg", "buffer": b"image"})
+                page.evaluate("window.documentMarker = 'unchanged'")
+                form.get_by_role("button", name="Tambah Item", exact=True).click()
+                expect(page.locator("#gallery-list")).to_contain_text("Assignment gallery")
+                self.assertEqual(page.evaluate("window.documentMarker"), "unchanged")
+
+                # Viewer and Editor can star; only Editor has an edit link.
+                for role in ("viewer", "editor"):
+                    login(role)
+                    page.goto(self.live_server_url + "/about/")
+                    expect(page.locator(".gallery-card")).to_have_count(2)
+                    expect(page.get_by_role("button", name="Tambah Item", exact=True)).to_have_count(0)
+                    expect(page.get_by_role("button", name="Hapus", exact=True)).to_have_count(0)
+                    star = page.locator(".button-like").first
+                    star.click()
+                    expect(star).to_have_attribute("aria-pressed", "true")
+                    star.click()
+                    expect(star).to_have_attribute("aria-pressed", "false")
+
+                page.get_by_role("link", name="Edit", exact=True).first.click()
+                edit = page.locator('[data-api-form]')
+                page.evaluate("window.documentMarker = 'unchanged'")
+                edit.locator('[name="title"]').fill("   ")
+                edit.get_by_role("button", name="Simpan Perubahan").click()
+                expect(page.locator("#toast-title")).to_have_text("Gagal menyimpan data")
+                expect(page.locator("#toast-message")).to_contain_text("title")
+                edit.locator('[name="title"]').fill("Edited by Editor")
+                edit.get_by_role("button", name="Simpan Perubahan").click()
+                expect(page.locator("#toast-title")).to_have_text("Sukses")
+                self.assertEqual(page.evaluate("window.documentMarker"), "unchanged")
+
+                # API errors must reach the toast instead of navigating to an API URL.
+                page.route("**/api/v1/gallery/*/", lambda route: route.fulfill(
+                    status=403, content_type="application/json", body='{"detail":"Permission denied."}'
+                ))
+                edit.get_by_role("button", name="Simpan Perubahan").click()
+                expect(page.locator("#toast-message")).to_have_text("Permission denied.")
+                self.assertEqual(page.evaluate("window.documentMarker"), "unchanged")
+                page.unroute("**/api/v1/gallery/*/")
+
+                login("owner")
+                page.goto(self.live_server_url + "/about/")
+                target = page.locator(".gallery-card").filter(has=page.get_by_role("heading", name="Edited by Editor", exact=True))
+                expect(target).to_have_count(1)
+                page.evaluate("window.documentMarker = 'unchanged'")
+                page.once("dialog", lambda dialog: dialog.accept())
+                target.get_by_role("button", name="Hapus", exact=True).click()
+                expect(page.locator(".gallery-card")).to_have_count(1)
+                self.assertEqual(page.evaluate("window.documentMarker"), "unchanged")
+
+                context.clear_cookies()
+                page.goto(self.live_server_url + "/about/")
+                expect(page.locator(".button-like")).to_be_disabled()
+                expect(page.get_by_role("link", name="Edit", exact=True)).to_have_count(0)
+                self.assertTrue(any(request.method == "PATCH" for request in writes))
+                self.assertTrue(any(request.method == "DELETE" for request in writes))
+                self.assertTrue(all(request.headers.get("x-csrftoken") for request in writes if "/api/v1/" in request.url))
+                self.assertEqual(errors, [])
+                browser.close()

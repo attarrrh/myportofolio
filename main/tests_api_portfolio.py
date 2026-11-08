@@ -1,9 +1,11 @@
 import tempfile
+import uuid
 from django.contrib.auth.models import Group, Permission, User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
 from django.urls import reverse
-from rest_framework.test import APITestCase
+from rest_framework.test import APIClient, APITestCase
+from django.utils import timezone
 from main.models import Experience, GalleryItem
 
 
@@ -12,7 +14,7 @@ class PortfolioAPITest(APITestCase):
         self.owner = User.objects.create_superuser("portfolio-owner", "owner@example.com", "test-password")
         self.editor = User.objects.create_user("portfolio-editor")
         self.editor.groups.add(Group.objects.create(name="Editor"))
-        self.viewer = User.objects.create_user("portfolio-viewer")
+        self.viewer = User.objects.create_user("portfolio-viewer", password="test-password")
         self.experience = Experience.objects.create(title="Research", description="Existing experience")
         self.gallery = GalleryItem.objects.create(title="Holiday", caption="Existing gallery", media_url="https://example.com/photo.jpg")
 
@@ -122,3 +124,125 @@ class PortfolioAPITest(APITestCase):
             self.assertEqual(self.client.options(url).status_code, 200)
             instance.refresh_from_db()
             self.assertNotEqual(instance.title, "Edited")
+
+    def test_rejected_writes_preserve_database_for_guest_viewer_and_editor(self):
+        for user in (None, self.viewer, self.editor):
+            self.client.force_authenticate(user=user)
+            for name, instance, payload in self.resources():
+                model = type(instance)
+                before = list(model.objects.order_by("pk").values())
+                list_url = reverse(f"api:{name}-list")
+                detail_url = reverse(f"api:{name}-detail", args=[instance.pk])
+                requests = [("post", list_url, payload), ("delete", detail_url, {})]
+                if user != self.editor:
+                    requests += [("put", detail_url, payload), ("patch", detail_url, {"title": "Forged"})]
+                for method, url, data in requests:
+                    with self.subTest(role=user, resource=name, method=method):
+                        response = getattr(self.client, method)(url, data, format="json")
+                        self.assertEqual(response.status_code, 403)
+                        self.assertEqual(list(model.objects.order_by("pk").values()), before)
+
+    def test_gallery_guest_cannot_star_and_missing_data_returns_404(self):
+        star = reverse("api:gallery-star", args=[self.gallery.pk])
+        self.assertEqual(self.client.post(star).status_code, 403)
+        self.assertEqual(self.gallery.liked_by.count(), 0)
+        self.client.force_authenticate(user=self.viewer)
+        self.assertEqual(self.client.get(star).status_code, 405)
+        for name, instance, payload in self.resources():
+            detail = reverse(f"api:{name}-detail", args=[uuid.uuid4()])
+            self.assertEqual(self.client.get(detail).status_code, 404)
+        self.client.force_authenticate(user=self.viewer)
+        self.assertEqual(self.client.post(reverse("api:gallery-star", args=[uuid.uuid4()])).status_code, 404)
+
+    def test_gallery_serialization_has_safe_read_only_star_fields(self):
+        self.gallery.liked_by.add(self.viewer)
+        for user in (None, self.viewer, self.editor, self.owner):
+            self.client.force_authenticate(user=user)
+            response = self.client.get(reverse("api:gallery-detail", args=[self.gallery.pk]))
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.data["star_count"], 1)
+            self.assertEqual(response.data["is_starred"], user == self.viewer)
+            self.assertNotIn("liked_by", response.data)
+            self.assertNotIn("password", response.data)
+            self.assertNotIn("email", response.data)
+            self.assertNotContains(response, self.viewer.password)
+        self.client.force_authenticate(user=self.owner)
+        response = self.client.patch(reverse("api:gallery-detail", args=[self.gallery.pk]), {
+            "id": str(uuid.uuid4()), "star_count": 999, "is_starred": True,
+            "liked_by": [self.owner.pk], "starred_by_names": "forged",
+        }, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["id"], str(self.gallery.pk))
+        self.assertEqual(response.data["star_count"], 1)
+        self.assertFalse(response.data["is_starred"])
+        self.assertEqual(list(self.gallery.liked_by.all()), [self.viewer])
+
+    def test_gallery_validation_cleans_text_and_rejects_without_saving(self):
+        self.client.force_authenticate(user=self.owner)
+        detail = reverse("api:gallery-detail", args=[self.gallery.pk])
+        before = list(GalleryItem.objects.values())
+        for data in ({"title": "<b></b>"}, {"title": "   "}, {"media_url": "javascript:alert(1)"}):
+            response = self.client.patch(detail, data, format="json")
+            self.assertEqual(response.status_code, 400)
+            self.assertEqual(list(GalleryItem.objects.values()), before)
+        response = self.client.patch(detail, {
+            "title": "<b>Holiday</b>",
+            "caption": "&lt;script&gt;alert(1)&lt;/script&gt;<b>Safe caption</b>",
+        }, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.gallery.refresh_from_db()
+        self.assertEqual(self.gallery.title, "Holiday")
+        self.assertEqual(self.gallery.caption, "Safe caption")
+
+    def test_gallery_session_csrf_protects_crud_and_star(self):
+        client = APIClient(enforce_csrf_checks=True)
+        self.assertTrue(client.login(username="portfolio-owner", password="test-password"))
+        list_url = reverse("api:gallery-list")
+        detail = reverse("api:gallery-detail", args=[self.gallery.pk])
+        star = reverse("api:gallery-star", args=[self.gallery.pk])
+        before = list(GalleryItem.objects.values())
+        for method, url, payload in [
+            ("post", list_url, {"title": "New", "media_url": "https://example.com/a.jpg"}),
+            ("put", detail, {"title": "Changed", "media_url": "https://example.com/a.jpg"}),
+            ("patch", detail, {"title": "Changed"}), ("delete", detail, {}), ("post", star, {}),
+        ]:
+            response = getattr(client, method)(url, payload, format="json")
+            self.assertEqual(response.status_code, 403)
+            self.assertEqual(list(GalleryItem.objects.values()), before)
+            self.assertEqual(self.gallery.liked_by.count(), 0)
+        # A normal page must supply a token even when there is no create modal.
+        self.assertTrue(client.login(username="portfolio-viewer", password="test-password"))
+        self.assertEqual(client.get(reverse("main:show_about")).status_code, 200)
+        token = client.cookies["csrftoken"].value
+        self.assertEqual(client.post(star, HTTP_X_CSRFTOKEN=token).status_code, 200)
+        self.assertTrue(self.gallery.liked_by.filter(pk=self.viewer.pk).exists())
+
+    def test_legacy_views_do_not_bypass_api_roles(self):
+        # Old Django add/delete permissions must not grant broader access than DRF.
+        self.editor.user_permissions.set(Permission.objects.filter(content_type__app_label="main"))
+        self.client.force_login(self.editor)
+        for name, instance, payload in self.resources():
+            gallery = name == "gallery"
+            create = "create_gallery_item" if gallery else "create_experience"
+            delete = "delete_gallery_item" if gallery else "delete_experience"
+            before = list(type(instance).objects.values())
+            self.assertEqual(self.client.get(reverse("main:" + create)).status_code, 403)
+            self.assertEqual(self.client.post(reverse("main:" + create), payload).status_code, 403)
+            self.assertEqual(self.client.post(reverse("main:" + create + "_ajax"), payload).status_code, 403)
+            self.assertEqual(self.client.post(reverse("main:" + delete, args=[instance.pk])).status_code, 403)
+            self.assertEqual(list(type(instance).objects.values()), before)
+
+    def test_edit_pages_submit_to_drf_and_optional_date_can_be_cleared(self):
+        self.client.force_login(self.editor)
+        for name, instance, payload in self.resources():
+            route = "update_gallery_item" if name == "gallery" else "update_experience"
+            response = self.client.get(reverse("main:" + route, args=[instance.pk]))
+            self.assertContains(response, 'data-api-method="PATCH"')
+            self.assertContains(response, reverse(f"api:{name}-detail", args=[instance.pk]))
+            self.assertContains(response, "js/resource-form.js")
+        self.experience.ended_at = timezone.now()
+        self.experience.save()
+        response = self.client.patch(reverse("api:experience-detail", args=[self.experience.pk]), {"ended_at": ""}, format="multipart")
+        self.assertEqual(response.status_code, 200, response.data)
+        self.experience.refresh_from_db()
+        self.assertIsNone(self.experience.ended_at)
