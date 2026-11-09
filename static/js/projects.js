@@ -77,10 +77,12 @@
   document.querySelector('[popovertarget="project-modal"]')?.addEventListener('click', () => {
     editing = null; form.reset(); document.getElementById('project-modal-title').textContent = 'Tambah Project';
   });
+  if (form) bindApiFormValidation(form);
   form?.addEventListener('submit', async event => {
     event.preventDefault();
     const button = form.querySelector('[type=submit]');
     if (button.disabled) return;
+    clearApiFormErrors(form);
     button.disabled = true;
     const payload = {};
     for (const key of ['title', 'description', 'tech_stack', 'project_url', 'project_image_url']) {
@@ -90,7 +92,10 @@
       await writeResource(editing ? `${list.dataset.apiUrl}${editing}/` : list.dataset.apiUrl,
         editing ? 'PATCH' : 'POST', payload);
       modal.hidePopover(); showToast('Sukses', 'Project tersimpan.', 'success'); await refresh();
-    } catch (error) { showToast('Periksa isian', error.message, 'error'); }
+    } catch (error) {
+      showApiFormErrors(form, error);
+      showToast('Periksa isian', error.message, 'error');
+    }
     finally { button.disabled = false; }
   });
   list.addEventListener('click', async event => {

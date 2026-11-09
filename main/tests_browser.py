@@ -1,5 +1,6 @@
 """Optional Chrome integration: TUTORIAL7_BROWSER_VERIFY=1 python manage.py test main.tests_browser."""
 import os
+import json
 import tempfile
 from unittest import skipUnless
 
@@ -49,7 +50,11 @@ class Tutorial7BrowserTest(StaticLiveServerTestCase):
                 form.locator('[name="tech_stack"]').fill("Django")
                 form.get_by_role("button", name="Simpan", exact=True).click()
                 expect(page.locator("#toast-message")).to_contain_text("title")
+                expect(form.locator('[name="title"]')).to_have_attribute("aria-invalid", "true")
+                expect(form.locator(".form-error")).not_to_have_text("")
                 form.locator('[name="title"]').fill("Browser project")
+                expect(form.locator(".form-error")).to_have_count(0)
+                expect(form.locator('[name="title"]')).not_to_have_attribute("aria-invalid", "true")
                 form.get_by_role("button", name="Simpan", exact=True).click()
                 expect(page.locator("#projects-list h2")).to_have_text("Browser project")
                 self.assertTrue(page.url.endswith("/projects/"))
@@ -172,10 +177,30 @@ class Tutorial7BrowserTest(StaticLiveServerTestCase):
                 edit.get_by_role("button", name="Simpan Perubahan").click()
                 expect(page.locator("#toast-title")).to_have_text("Gagal menyimpan data")
                 expect(page.locator("#toast-message")).to_contain_text("title")
+                expect(edit.locator('[name="title"]')).to_have_attribute("aria-invalid", "true")
+                expect(edit.locator('[name="title"]')).to_be_focused()
+                expect(edit.locator(".form-error")).not_to_have_text("")
                 edit.locator('[name="title"]').fill("Edited by Editor")
+                expect(edit.locator(".form-error")).to_have_count(0)
                 edit.get_by_role("button", name="Simpan Perubahan").click()
                 expect(page.locator("#toast-title")).to_have_text("Sukses")
                 self.assertEqual(page.evaluate("window.documentMarker"), "unchanged")
+
+                # Error text is untrusted too; preserve existing accessibility hints.
+                edit.locator('[name="title"]').evaluate("control => control.setAttribute('aria-describedby', 'existing-hint')")
+                error_text = '<img src=x onerror="window.xssExecuted=true">Invalid title'
+                page.route("**/api/v1/gallery/*/", lambda route: route.fulfill(
+                    status=400, content_type="application/json", body=json.dumps({"title": [error_text]})
+                ))
+                edit.get_by_role("button", name="Simpan Perubahan").click()
+                expect(edit.locator(".form-error")).to_have_text(error_text)
+                expect(edit.locator(".form-error img")).to_have_count(0)
+                expect(edit.locator('[name="title"]')).to_have_attribute("aria-describedby", "existing-hint api-error-resource-form-title")
+                self.assertIsNone(page.evaluate("window.xssExecuted"))
+                edit.locator('[name="title"]').fill("Edited by Editor")
+                expect(edit.locator(".form-error")).to_have_count(0)
+                expect(edit.locator('[name="title"]')).to_have_attribute("aria-describedby", "existing-hint")
+                page.unroute("**/api/v1/gallery/*/")
 
                 # API errors must reach the toast instead of navigating to an API URL.
                 page.route("**/api/v1/gallery/*/", lambda route: route.fulfill(
@@ -183,6 +208,7 @@ class Tutorial7BrowserTest(StaticLiveServerTestCase):
                 ))
                 edit.get_by_role("button", name="Simpan Perubahan").click()
                 expect(page.locator("#toast-message")).to_have_text("Permission denied.")
+                expect(edit.locator(".form-error")).to_have_count(0)
                 self.assertEqual(page.evaluate("window.documentMarker"), "unchanged")
                 page.unroute("**/api/v1/gallery/*/")
 

@@ -2,10 +2,12 @@
 document.addEventListener('DOMContentLoaded', function () {
   const form = document.querySelector('[data-api-form]');
   if (!form) return;
+  bindApiFormValidation(form);
   form.addEventListener('submit', async function (event) {
     event.preventDefault();
     const submit = form.querySelector('[type=submit]');
     if (submit.disabled) return;
+    clearApiFormErrors(form);
     submit.disabled = true;
     const body = new FormData(form);
     body.delete('csrfmiddlewaretoken');
@@ -17,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // Keep the form and page in place so the user can continue editing.
       showToast('Sukses', 'Data berhasil disimpan.', 'success');
     } catch (error) {
+      showApiFormErrors(form, error);
       showToast('Gagal menyimpan data', error.message, 'error');
     } finally {
       submit.disabled = false;

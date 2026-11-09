@@ -38,9 +38,58 @@ async function writeResource(url, method, payload) {
   const response = await fetch(url, options);
   if (response.status === 204) return null;
   const data = await response.json().catch(() => null);
-  if (!response.ok) throw new Error(data ? apiErrorMessage(data) : `HTTP ${response.status}`);
+  if (!response.ok) {
+    const error = new Error(data ? apiErrorMessage(data) : `HTTP ${response.status}`);
+    error.status = response.status;
+    error.data = data;
+    throw error;
+  }
   if (data === null) throw new Error('Server tidak mengembalikan JSON.');
   return data;
+}
+
+function clearApiFieldError(control) {
+  const id = control.dataset?.apiErrorId;
+  if (!id) return;
+  document.getElementById(id)?.remove();
+  const descriptions = (control.getAttribute('aria-describedby') || '').split(/\s+/)
+    .filter(value => value && value !== id);
+  if (descriptions.length) control.setAttribute('aria-describedby', descriptions.join(' '));
+  else control.removeAttribute('aria-describedby');
+  control.removeAttribute('aria-invalid');
+  delete control.dataset.apiErrorId;
+}
+
+function clearApiFormErrors(form) {
+  for (const control of form.elements) clearApiFieldError(control);
+}
+
+function bindApiFormValidation(form) {
+  form.addEventListener('input', event => clearApiFieldError(event.target));
+  form.addEventListener('change', event => clearApiFieldError(event.target));
+  form.addEventListener('reset', () => clearApiFormErrors(form));
+}
+
+function showApiFormErrors(form, error) {
+  if (error.status !== 400 || !error.data || typeof error.data !== 'object') return;
+  let first;
+  for (const [name, messages] of Object.entries(error.data)) {
+    const control = form.elements.namedItem(name);
+    if (!control || typeof control.focus !== 'function' || control.type === 'hidden') continue;
+    clearApiFieldError(control);
+    const message = listElement('p', 'form-error');
+    message.id = `api-error-${form.id || 'resource-form'}-${name}`;
+    // Use textContent even for validation messages returned by the server.
+    message.textContent = Array.isArray(messages) ? messages.join(' ') : String(messages);
+    message.setAttribute('role', 'alert');
+    (control.closest('.form-group') || control.parentElement).appendChild(message);
+    control.dataset.apiErrorId = message.id;
+    control.setAttribute('aria-invalid', 'true');
+    const descriptions = control.getAttribute('aria-describedby');
+    control.setAttribute('aria-describedby', [descriptions, message.id].filter(Boolean).join(' '));
+    first ||= control;
+  }
+  first?.focus();
 }
 
 function buildGalleryCard(item, list) {
@@ -189,10 +238,12 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   const form = document.getElementById(kind === 'experience' ? 'experience-form' : 'gallery-item-form');
+  if (form) bindApiFormValidation(form);
   if (form) form.addEventListener('submit', async function (event) {
     event.preventDefault();
     const submit = form.querySelector('[type=submit]');
     if (submit.disabled) return;
+    clearApiFormErrors(form);
     submit.disabled = true;
     try {
       const body = new FormData(form);
@@ -207,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const loaded = await refresh();
       showToast('Sukses', 'Data berhasil ditambahkan.' + (loaded ? '' : ' Daftar gagal dimuat.'), 'success');
     } catch (error) {
+      showApiFormErrors(form, error);
       showToast('Gagal menambahkan data', error.message, 'error');
     } finally {
       submit.disabled = false;
