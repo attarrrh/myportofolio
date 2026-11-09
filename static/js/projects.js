@@ -26,13 +26,13 @@
     }
     const specimen = listElement('div', 'project-specimen');
     specimen.setAttribute('aria-hidden', 'true');
-    specimen.append(listElement('span', 'project-specimen-label', 'PROJECT / ' + number),
+    specimen.append(listElement('span', 'project-specimen-label', number),
       listElement('span', 'project-specimen-title', record.title),
       listElement('span', 'project-specimen-stack', record.tech_stack));
     media.append(specimen);
     const info = listElement('div', 'project-info');
     const meta = listElement('div', 'project-meta');
-    meta.append(listElement('span', '', 'PROJECT ' + number), listElement('span', '', record.tech_stack));
+    meta.append(listElement('span', '', number), listElement('span', '', record.tech_stack));
     info.append(meta, listElement('h2', 'project-title', record.title), listElement('p', 'project-description', record.description));
     const url = record.project_url && safeMediaUrl(record.project_url);
     if (url) {
@@ -75,9 +75,7 @@
       projects.forEach((project, index) => { records.set(project.id, project); list.append(card(project, index)); });
       if (!projects.length) {
         const empty = listElement('div', 'empty-state work-empty');
-        empty.append(listElement('span', 'work-empty-mark', '↗'),
-          listElement('h2', '', input.value.trim() ? 'Tidak ada project yang sesuai.' : 'Ruang untuk ide berikutnya.'),
-          listElement('p', '', input.value.trim() ? 'Coba judul atau kata kunci lainnya.' : 'Belum ada project yang dipublikasikan. Kembali lagi untuk melihat perkembangannya.'));
+        empty.append(listElement('h2', '', input.value.trim() ? 'Tidak ada project.' : 'Belum ada project.'));
         list.append(empty);
       }
     } catch (error) {

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block meta %}<link rel="stylesheet" href="{% static 'css/skills-playground.css' %}?v=1">{% endblock meta %}
+{% block meta %}<link rel="stylesheet" href="{% static 'css/skills-playground.css' %}?v=3">{% endblock meta %}
 {% block content %}
 
   <!-- ============ HERO / PROFILE ============ -->
@@ -63,8 +63,7 @@
   <section id="skills" class="skills skill-playground" aria-labelledby="skills-title">
     <div class="wrap">
       <div class="skill-heading">
-        <div><p class="skill-eyebrow">MY TOOLBOX / ALWAYS LEARNING</p><h2 class="section-title" id="skills-title">SKILL<span aria-hidden="true">&#8599;</span></h2></div>
-        <p class="skill-intro">Geser kartunya.<br>Kenali skill-nya.</p>
+        <h2 class="section-title" id="skills-title">SKILL<span aria-hidden="true">&#8599;</span></h2>
       </div>
       <div class="skill-controls">
         <div class="skill-filters" role="group" aria-label="Filter kategori skill">
@@ -80,29 +79,30 @@
       </div>
       <div class="skill-workspace">
         <div class="skill-stage" id="skill-stage" role="group" aria-label="Kartu skill interaktif" aria-describedby="skill-instructions">
-          <button type="button" class="skill-chip" data-category="code" data-level="90" data-description="Bahasa pemrograman untuk menyusun logika, mengolah data, dan membangun aplikasi." aria-pressed="true"><span class="skill-chip-icon" aria-hidden="true">py</span><span class="skill-chip-name">Python</span></button>
-          <button type="button" class="skill-chip" data-category="code" data-level="80" data-description="Bahasa pemrograman berorientasi objek dengan ekosistem aplikasi yang luas." aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">Jv</span><span class="skill-chip-name">Java</span></button>
-          <button type="button" class="skill-chip" data-category="code" data-level="40" data-description="Bahasa untuk menambahkan perilaku dan interaksi pada halaman web." aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">JS</span><span class="skill-chip-name">JavaScript</span></button>
-          <button type="button" class="skill-chip" data-category="code" data-level="20" data-description="Framework Python untuk membangun aplikasi web dan mengelola data di server." aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">dj</span><span class="skill-chip-name">Django</span></button>
-          <button type="button" class="skill-chip" data-category="tools" data-level="65" data-description="Bahasa untuk membaca, menyusun, dan mengolah data pada database relasional." aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">db</span><span class="skill-chip-name">SQL</span></button>
-          <button type="button" class="skill-chip" data-category="tools" data-level="40" data-description="Version control dan tempat berkolaborasi serta menyimpan riwayat perubahan kode." aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">git</span><span class="skill-chip-name">Git & GitHub</span></button>
-          <button type="button" class="skill-chip" data-category="tools" data-level="30" data-description="Lingkungan sistem operasi dengan beragam alat kerja melalui terminal." aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">~ /</span><span class="skill-chip-name">Linux</span></button>
-          <button type="button" class="skill-chip" data-category="tools" data-level="50" data-description="Alat desain untuk mengeksplorasi tampilan, layout, dan prototipe antarmuka." aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">fig</span><span class="skill-chip-name">Figma</span></button>
-          <button type="button" class="skill-chip" data-category="people" data-level="70" data-description="Menyampaikan gagasan secara jelas di hadapan orang lain." aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">mic</span><span class="skill-chip-name">Public Speaking</span></button>
-          <button type="button" class="skill-chip" data-category="people" data-level="80" data-description="Mengatur persiapan, koordinasi, dan pelaksanaan sebuah kegiatan." aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">evt</span><span class="skill-chip-name">Event Organizing</span></button>
-          <button type="button" class="skill-chip" data-category="people" data-level="90" data-description="Mengatur pekerjaan, waktu, dan koordinasi agar sebuah proyek berjalan terarah." aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">pm</span><span class="skill-chip-name">Project Management</span></button>
+          <button type="button" class="skill-chip" data-category="code" data-level="90" aria-pressed="true"><span class="skill-chip-icon" aria-hidden="true">py</span><span class="skill-chip-name">Python</span></button>
+          <button type="button" class="skill-chip" data-category="code" data-level="80" aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">Jv</span><span class="skill-chip-name">Java</span></button>
+          <button type="button" class="skill-chip" data-category="code" data-level="40" aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">JS</span><span class="skill-chip-name">JavaScript</span></button>
+          <button type="button" class="skill-chip" data-category="code" data-level="20" aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">dj</span><span class="skill-chip-name">Django</span></button>
+          <button type="button" class="skill-chip" data-category="tools" data-level="65" aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">db</span><span class="skill-chip-name">SQL</span></button>
+          <button type="button" class="skill-chip" data-category="tools" data-level="40" aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">git</span><span class="skill-chip-name">Git & GitHub</span></button>
+          <button type="button" class="skill-chip" data-category="tools" data-level="30" aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">~ /</span><span class="skill-chip-name">Linux</span></button>
+          <button type="button" class="skill-chip" data-category="tools" data-level="50" aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">fig</span><span class="skill-chip-name">Figma</span></button>
+          <button type="button" class="skill-chip" data-category="people" data-level="70" aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">mic</span><span class="skill-chip-name">Public Speaking</span></button>
+          <button type="button" class="skill-chip" data-category="people" data-level="80" aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">evt</span><span class="skill-chip-name">Event Organizing</span></button>
+          <button type="button" class="skill-chip" data-category="people" data-level="90" aria-pressed="false"><span class="skill-chip-icon" aria-hidden="true">pm</span><span class="skill-chip-name">Project Management</span></button>
         </div>
-        <aside class="skill-inspector" aria-label="Detail skill yang dipilih">
-          <p class="skill-eyebrow" id="skill-category">LANGUAGES &amp; FRAMEWORK</p>
-          <h3 id="skill-name">Python</h3>
-          <p id="skill-description">Bahasa pemrograman untuk menyusun logika, mengolah data, dan membangun aplikasi.</p>
-          <div class="skill-level-label"><span>Penilaian pribadi</span><span id="skill-level-text">90%</span></div>
-          <div class="skill-level" id="skill-level" role="meter" aria-label="Penilaian pribadi untuk Python" aria-valuemin="0" aria-valuemax="100" aria-valuenow="90"><span style="width:90%"></span></div>
-          <p class="skill-inspector-note">Terus belajar, satu hal baru setiap hari.</p>
-          <a class="skill-project-link" href="{% url 'main:show_projects' %}">Lihat yang saya bangun <span aria-hidden="true">&#8599;</span></a>
+        <aside class="skill-inspector" aria-label="Skill yang dipilih">
+          <div class="skill-selection-title">
+            <p class="skill-eyebrow" id="skill-category">Code</p>
+            <h3 id="skill-name">Python</h3>
+          </div>
+          <div class="skill-selection-level">
+            <div class="skill-level-label"><span>Penilaian pribadi</span><span id="skill-level-text">90%</span></div>
+            <div class="skill-level" id="skill-level" role="meter" aria-label="Penilaian pribadi untuk Python" aria-valuemin="0" aria-valuemax="100" aria-valuenow="90"><span style="width:90%"></span></div>
+          </div>
         </aside>
       </div>
-      <div class="skill-caption"><p id="skill-instructions">Geser &amp; lempar kartu untuk bermain. Klik untuk detail. Keyboard: Tab untuk fokus, Enter untuk memilih, panah untuk menggeser.</p><span aria-hidden="true">HAVE A LITTLE PLAY.</span></div>
+      <p id="skill-instructions" class="skill-sr-only">Geser kartu. Keyboard: Tab untuk fokus, Enter untuk memilih, panah untuk menggeser.</p>
       <p id="skill-announcement" class="skill-sr-only" role="status" aria-live="polite"></p>
     </div>
   </section>
@@ -206,7 +206,7 @@
  
   <script src="/static/js/theme-switcher.js"></script> -->
   <script src="{% static 'js/parallax.js' %}"></script>
-  <script src="{% static 'js/skills-playground.js' %}?v=1"></script>
+  <script src="{% static 'js/skills-playground.js' %}?v=3"></script>
 
   {% endblock extra_js %}
 <!-- </body>

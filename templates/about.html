@@ -2,15 +2,26 @@
 {% load static %}
 {% block meta %}
     <title>About Me - {{ name }}</title>
+    <link rel="stylesheet" href="{% static 'css/work-pages.css' %}?v=2">
+    <link rel="stylesheet" href="{% static 'css/photo-journal.css' %}?v=1">
 {% endblock meta %}
 {% block content %}
   <main>
 
   <!-- ============ ABOUT ME GALLERY (dari database, via JSON) ============ -->
-  <section id="about" class="experience experience-page">
-    <div class="wrap">
-      <div class="list-header">
-        <h1 class="section-title">ABOUT ME</h1>
+  <section id="about" class="work-page journal-page">
+    <div class="wrap journal-layout">
+      {% include "components/work_page_header.html" with heading="ABOUT ME" %}
+      <div class="journal-toolbar">
+        <div class="journal-filters" role="group" aria-label="Jenis media">
+          <button type="button" data-media-filter="all" aria-pressed="true">Semua</button>
+          <button type="button" data-media-filter="photo" aria-pressed="false">Foto</button>
+          <button type="button" data-media-filter="video" aria-pressed="false">Video</button>
+        </div>
+      <form method="get" action="{% url 'main:show_about' %}" class="work-search journal-search" data-live-search data-debounce-ms="300">
+          <input type="search" name="title" value="{{ title_query }}" placeholder="Cari momen" class="list-search__input" aria-label="Cari momen" autocomplete="off">
+          <button type="submit" aria-label="Cari">Cari <span aria-hidden="true">↗</span></button>
+      </form>
         {% if user.is_superuser %}
         <button type="button" class="button list-add-button"
           popovertarget="add-gallery-item-modal" popovertargetaction="show">
@@ -18,25 +29,13 @@
         </button>
         {% endif %}
       </div>
-      <p class="section-sub">Photo, Video of My Life</p>
-
-      <form method="get" action="{% url 'main:show_about' %}" class="list-search" data-live-search data-debounce-ms="300">
-          <input type="search"
-                 name="title"
-                 value="{{ title_query }}"
-                 placeholder="Cari berdasarkan judul"
-                 class="list-search__input"
-                 aria-label="Cari berdasarkan judul"
-                 autocomplete="off">
-          <button type="submit" class="button">Cari</button>
-      </form>
-
-      <div class="gallery-grid" id="gallery-list" aria-live="polite" aria-busy="true"
+      <div class="gallery-grid journal-wall" id="gallery-list" aria-live="polite" aria-busy="true"
            data-can-delete="{{ user.is_superuser|yesno:'true,false' }}" data-list-kind="gallery" data-api-url="{% url 'api:gallery-list' %}"
            data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}"
            data-can-manage="{{ can_edit|yesno:"true,false" }}">
-        <p class="empty-state" role="status">Memuat data galeri...</p>
+        <p class="empty-state" role="status">Memuat momen...</p>
       </div>
+      <p id="journal-filter-empty" class="empty-state" hidden>Belum ada momen.</p>
     </div>
   </section>
 
@@ -45,10 +44,16 @@
   {% endif %}
 
   <div hidden>{% csrf_token %}</div>
+  <dialog id="journal-viewer" class="journal-viewer" aria-labelledby="journal-viewer-title">
+    <button type="button" class="journal-viewer-close" aria-label="Tutup foto">×</button>
+    <div class="journal-viewer-media"></div>
+    <h2 id="journal-viewer-title"></h2>
+    <p id="journal-viewer-caption"></p>
+  </dialog>
   </main>
 {% endblock content %}
 
 {% block extra_js %}
-  <script src="{% static 'js/experience.js' %}?v=tutorial7"></script>
-  <script src="{% static 'js/ajax-list.js' %}?v=field-errors"></script>
+  <script src="{% static 'js/ajax-list.js' %}?v=photo-journal-1"></script>
+  <script src="{% static 'js/photo-journal.js' %}?v=1"></script>
 {% endblock extra_js %}

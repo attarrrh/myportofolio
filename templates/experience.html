@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% load static %}
 {% block meta %}
-  <link rel="stylesheet" href="{% static 'css/work-pages.css' %}?v=1">
+  <link rel="stylesheet" href="{% static 'css/work-pages.css' %}?v=2">
 {% endblock meta %}
 {% block title %}Experience — {{ name }}{% endblock title %}
 {% block content %}
   <main class="work-page work-page--experience">
   <section id="experience" class="wrap work-layout" aria-label="Experience">
-      {% include 'components/work_page_header.html' with heading='EXPERIENCE' page_number='01' page_kind='experience' description='Pengalaman, kegiatan, dan ruang untuk terus belajar.' %}
+      {% include 'components/work_page_header.html' with heading='EXPERIENCE' %}
       <div class="work-toolbar">
-        <p class="work-index-label"><span class="work-status-dot" aria-hidden="true"></span> THE JOURNEY</p>
+
         <form method="get" action="{% url 'main:show_experience' %}"
           class="work-search" data-live-search data-debounce-ms="300" role="search">
           <label for="experience-search" class="work-sr-only">Cari pengalaman berdasarkan judul</label>
@@ -29,10 +29,6 @@
             data-can-manage="{{ can_edit|yesno:"true,false" }}">
         <li class="empty-state" role="status">Memuat data experience...</li>
       </ol>
-      <a class="work-next" href="{% url 'main:show_projects' %}">
-        <span><small>LANJUT JELAJAHI</small><strong>See the projects.</strong></span>
-        <span class="work-next-arrow" aria-hidden="true">↗</span>
-      </a>
   </section>
 
   {% if user.is_superuser %}

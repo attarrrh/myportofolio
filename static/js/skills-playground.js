@@ -4,7 +4,7 @@
   const root = document.getElementById('skills');
   const filters = [...root.querySelectorAll('[data-skill-filter]')];
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
-  const categories = {code: 'LANGUAGES & FRAMEWORK', tools: 'DATA & TOOLS', people: 'OTHER SKILLS'};
+  const categories = {code: 'Code', tools: 'Tools', people: 'People'};
   const cards = [...stage.querySelectorAll('.skill-chip')].map(node => ({
     node, x: 0, y: 0, w: 0, h: 0, vx: 0, vy: 0, tilt: 0
   }));
@@ -29,7 +29,6 @@
     const level = card.node.dataset.level;
     document.getElementById('skill-name').textContent = name;
     document.getElementById('skill-category').textContent = categories[card.node.dataset.category];
-    document.getElementById('skill-description').textContent = card.node.dataset.description;
     document.getElementById('skill-level-text').textContent = level + '%';
     const meter = document.getElementById('skill-level');
     meter.setAttribute('aria-valuenow', level);
@@ -45,12 +44,48 @@
   }
 
   function contain(card) {
-    const maxX = Math.max(padding, stage.clientWidth - card.w - padding);
-    const maxY = Math.max(padding, stage.clientHeight - card.h - padding);
-    if (card.x < padding || card.x > maxX) card.vx *= -.45;
-    if (card.y < padding || card.y > maxY) card.vy *= -.45;
-    card.x = clamp(card.x, padding, maxX);
-    card.y = clamp(card.y, padding, maxY);
+    const angle = card.tilt * Math.PI / 180;
+    const extraX = Math.max(0, (Math.abs(card.w * Math.cos(angle)) + Math.abs(card.h * Math.sin(angle)) - card.w) / 2);
+    const extraY = Math.max(0, (Math.abs(card.h * Math.cos(angle)) + Math.abs(card.w * Math.sin(angle)) - card.h) / 2);
+    const minX = padding + extraX, minY = padding + extraY;
+    const maxX = Math.max(minX, stage.clientWidth - card.w - padding - extraX);
+    const maxY = Math.max(minY, stage.clientHeight - card.h - padding - extraY);
+    if (card.x < minX || card.x > maxX) card.vx *= -.45;
+    if (card.y < minY || card.y > maxY) card.vy *= -.45;
+    card.x = clamp(card.x, minX, maxX);
+    card.y = clamp(card.y, minY, maxY);
+  }
+
+  function scatter(entries, width, height) {
+    let free = [{x: padding, y: padding, w: width - padding * 2, h: height - padding * 2}];
+    const placements = [];
+    // Larger cards go first, but their locations are not tied to DOM order or rows.
+    const order = [...entries].sort((a, b) => b.w * b.h - a.w * a.h);
+    for (const card of order) {
+      const angle = card.tilt * Math.PI / 180;
+      const w = Math.abs(card.w * Math.cos(angle)) + Math.abs(card.h * Math.sin(angle)) + 12;
+      const h = Math.abs(card.h * Math.cos(angle)) + Math.abs(card.w * Math.sin(angle)) + 12;
+      const choices = free.filter(rect => rect.w >= w && rect.h >= h).sort((a, b) => a.w * a.h - b.w * b.h);
+      if (!choices.length) return null;
+      const space = choices[Math.floor(Math.random() * Math.min(3, choices.length))];
+      const box = {x: space.x + Math.random() * (space.w - w), y: space.y + Math.random() * (space.h - h), w, h};
+      placements.push({card, x: box.x + (w - card.w) / 2, y: box.y + (h - card.h) / 2});
+      const next = [];
+      for (const rect of free) {
+        if (box.x >= rect.x + rect.w || box.x + w <= rect.x || box.y >= rect.y + rect.h || box.y + h <= rect.y) {
+          next.push(rect);
+          continue;
+        }
+        if (box.x > rect.x) next.push({x: rect.x, y: rect.y, w: box.x - rect.x, h: rect.h});
+        if (box.x + w < rect.x + rect.w) next.push({x: box.x + w, y: rect.y, w: rect.x + rect.w - box.x - w, h: rect.h});
+        if (box.y > rect.y) next.push({x: rect.x, y: rect.y, w: rect.w, h: box.y - rect.y});
+        if (box.y + h < rect.y + rect.h) next.push({x: rect.x, y: box.y + h, w: rect.w, h: rect.y + rect.h - box.y - h});
+      }
+      free = next.filter((rect, i) => !next.some((other, j) => i !== j &&
+        other.x <= rect.x && other.y <= rect.y && other.x + other.w >= rect.x + rect.w && other.y + other.h >= rect.y + rect.h &&
+        (other.w * other.h > rect.w * rect.h || j < i)));
+    }
+    return placements;
   }
 
   function arrange() {
@@ -58,34 +93,37 @@
     dragging?.card.node.classList.remove('is-dragging');
     dragging = null;
     const width = stage.clientWidth;
-    const rows = [[]];
-    let used = 0;
-    for (const card of activeCards()) {
+    if (width <= padding * 2 + 12) return;
+    const entries = activeCards();
+    for (const card of entries) {
+      card.node.style.maxWidth = Math.max(48, width - padding * 2 - 12) + 'px';
       card.w = card.node.offsetWidth;
       card.h = card.node.offsetHeight;
-      if (used && used + card.w > width - padding * 2) { rows.push([]); used = 0; }
-      rows[rows.length - 1].push(card);
-      used += card.w + 18;
+      card.tilt = (Math.random() - .5) * 24;
+      const radians = card.tilt * Math.PI / 180;
+      if (Math.abs(card.w * Math.cos(radians)) + Math.abs(card.h * Math.sin(radians)) + 12 > width - padding * 2) card.tilt = 0;
     }
-    const heights = rows.map(row => Math.max(...row.map(card => card.h), 0));
-    const contentHeight = heights.reduce((sum, h) => sum + h, 0);
-    const minHeight = parseFloat(getComputedStyle(stage).minHeight) || 390;
-    const height = Math.max(minHeight, contentHeight + (rows.length + 1) * 30);
-    stage.style.height = height + 'px';
-    let y = (height - contentHeight) / (rows.length + 1);
-    rows.forEach((row, index) => {
-      const rowWidth = row.reduce((sum, card) => sum + card.w, 0) + Math.max(0, row.length - 1) * 18;
-      let x = (width - rowWidth) / 2;
-      row.forEach((card, i) => {
-        card.x = x;
-        card.y = y + (i % 2 ? 6 : -6);
-        card.tilt = motion.matches ? 0 : ((cards.indexOf(card) % 3) - 1) * 3;
-        contain(card);
-        paint(card);
-        x += card.w + 18;
+    let height = parseFloat(getComputedStyle(stage).minHeight) || 390;
+    let placements;
+    // Give narrow screens extra room instead of stacking or clipping labels.
+    for (let attempt = 0; attempt < 20; attempt++) {
+      placements = scatter(entries, width, height);
+      if (placements) break;
+      height += 50;
+    }
+    if (!placements) {
+      // Guaranteed readable fallback for unusually narrow containers.
+      let y = padding;
+      placements = entries.map(card => {
+        card.tilt = 0;
+        const placement = {card, x: (width - card.w) / 2, y};
+        y += card.h + 24;
+        return placement;
       });
-      y += heights[index] + (height - contentHeight) / (rows.length + 1);
-    });
+      height = Math.max(height, y + padding);
+    }
+    stage.style.height = height + 'px';
+    for (const {card, x, y} of placements) { card.x = x; card.y = y; contain(card); paint(card); }
     previousWidth = width;
   }
 

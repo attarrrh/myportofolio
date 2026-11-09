@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}Projects — Attar{% endblock %}
-{% block meta %}<link rel="stylesheet" href="{% static 'css/work-pages.css' %}?v=1">{% endblock %}
+{% block meta %}<link rel="stylesheet" href="{% static 'css/work-pages.css' %}?v=2">{% endblock %}
 {% block content %}
 <main class="work-page work-page--projects"><section class="wrap work-layout" aria-label="Projects">
-  {% include 'components/work_page_header.html' with heading='PROJECTS' page_number='02' page_kind='projects' description='Ide yang dicoba. Hal yang dibangun. Proses yang terus berjalan.' %}
+  {% include 'components/work_page_header.html' with heading='PROJECTS' %}
   <div class="work-toolbar">
-    <p class="work-index-label"><span class="work-status-dot" aria-hidden="true"></span> THE WORK</p>
+
     <form id="project-search" class="work-search" method="get" role="search">
       <label for="project-search-input" class="work-sr-only">Cari project berdasarkan judul</label>
       <input id="project-search-input" class="list-search__input" type="search" name="title" value="{{ title_query }}" placeholder="Cari project…" autocomplete="off">
@@ -19,10 +19,6 @@
        data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}" data-login-url="{% url 'main:login' %}">
     <p class="empty-state" role="status">Memuat projects...</p>
   </div>
-  <a class="work-next" href="mailto:attarrrh@gmail.com">
-    <span><small>PUNYA IDE UNTUK DIKERJAKAN BERSAMA?</small><strong>Let's talk.</strong></span>
-    <span class="work-next-arrow" aria-hidden="true">↗</span>
-  </a>
   <div hidden>{% csrf_token %}</div>
 </section></main>
 {% if user.is_superuser %}
@@ -41,5 +37,5 @@
 {% endblock %}
 {% block extra_js %}
 <script src="{% static 'js/ajax-list.js' %}?v=field-errors"></script>
-<script src="{% static 'js/projects.js' %}?v=work-pages-1"></script>
+<script src="{% static 'js/projects.js' %}?v=work-pages-2"></script>
 {% endblock %}

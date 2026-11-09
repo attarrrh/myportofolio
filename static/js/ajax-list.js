@@ -95,8 +95,17 @@ function showApiFormErrors(form, error) {
 function buildGalleryCard(item, list) {
   const record = item;
   const pk = encodeURIComponent(item.id);
-  const card = listElement('div', 'gallery-card');
-  const media = listElement('div', 'gallery-media');
+  const card = listElement('article', 'gallery-card');
+  card.dataset.mediaType = record.media_type;
+  const isPhoto = record.media_type !== 'video';
+  const media = listElement(isPhoto ? 'button' : 'div', 'gallery-media');
+  if (isPhoto) {
+    media.type = 'button';
+    media.setAttribute('aria-label', `Lihat foto: ${record.title}`);
+    media.dataset.journalPhoto = '';
+    media.dataset.title = record.title || '';
+    media.dataset.caption = record.caption || '';
+  }
   const source = safeMediaUrl(record.display_url || record.media_url);
   if (source) {
     const visual = document.createElement(record.media_type === 'video' ? 'video' : 'img');
@@ -109,18 +118,24 @@ function buildGalleryCard(item, list) {
       visual.loading = 'lazy';
     }
     media.appendChild(visual);
+    if (isPhoto) media.dataset.source = source;
   }
   const info = listElement('div', 'gallery-info');
   info.appendChild(listElement('span', 'gallery-category', record.category_display));
   info.appendChild(listElement('h3', '', record.title));
-  if (record.caption) info.appendChild(listElement('p', '', record.caption));
+  if (record.caption) {
+    const details = listElement('details', 'journal-caption');
+    details.append(listElement('summary', '', 'Catatan'), listElement('p', '', record.caption));
+    info.append(details);
+  }
 
   const star = listElement('button', 'button button-like');
   star.type = 'button';
   const updateStar = function (state) {
     star.classList.toggle('is-liked', state.is_starred);
     star.setAttribute('aria-pressed', String(state.is_starred));
-    star.textContent = `★ ${state.is_starred ? 'Batal Star' : 'Star'} (${state.star_count})`;
+    star.textContent = `${state.is_starred ? '★' : '☆'} ${state.star_count}`;
+    star.setAttribute('aria-label', `${state.is_starred ? 'Batal Star' : 'Star'} ${record.title} (${state.star_count})`);
   };
   updateStar(record);
   if (list.dataset.authenticated !== 'true') {
@@ -193,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const current = new AbortController();
     controller = current;
     list.setAttribute('aria-busy', 'true');
-    showState(kind === 'experience' ? 'Memuat data experience...' : 'Memuat data galeri...');
+    showState(kind === 'experience' ? 'Memuat data experience...' : 'Memuat momen...');
     const url = new URL(list.dataset.apiUrl, window.location.origin);
     const query = input.value.trim();
     if (query) url.searchParams.set('title', query);
@@ -209,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
       list.replaceChildren();
       if (!items.length) {
         showState(query ? 'Tidak ada data dengan judul tersebut.' :
-          (kind === 'experience' ? 'Belum ada pengalaman yang ditambahkan.' : 'Belum ada item galeri yang ditambahkan.'));
+          (kind === 'experience' ? 'Belum ada pengalaman yang ditambahkan.' : 'Belum ada momen.'));
       } else {
         for (const item of items) {
           list.appendChild(kind === 'experience' ? buildExperienceCardElement(item) : buildGalleryCard(item, list));
@@ -222,7 +237,10 @@ document.addEventListener('DOMContentLoaded', function () {
       showToast('Gagal memuat data', 'Periksa koneksi lalu coba cari kembali.', 'error');
       return false;
     } finally {
-      if (controller === current) list.setAttribute('aria-busy', 'false');
+      if (controller === current) {
+        list.setAttribute('aria-busy', 'false');
+        list.dispatchEvent(new Event('portfolio:loaded'));
+      }
     }
   }
 
