@@ -3,6 +3,7 @@ const mainNav = document.getElementById('mainNav');
 
 if (navToggle && mainNav) {
   const closeNav = function () {
+    mainNav.hidden = true;
     mainNav.classList.remove('is-open');
     navToggle.setAttribute('aria-expanded', 'false');
     navToggle.setAttribute('aria-label', 'Buka menu navigasi');
@@ -10,6 +11,7 @@ if (navToggle && mainNav) {
 
   navToggle.addEventListener('click', function () {
     const isOpen = navToggle.getAttribute('aria-expanded') === 'true';
+    mainNav.hidden = isOpen;
     navToggle.setAttribute('aria-expanded', String(!isOpen));
     navToggle.setAttribute('aria-label', isOpen ? 'Buka menu navigasi' : 'Tutup menu navigasi');
     mainNav.classList.toggle('is-open', !isOpen);
@@ -20,7 +22,7 @@ if (navToggle && mainNav) {
   });
 
   document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape') {
+    if (event.key === 'Escape' && !mainNav.hidden) {
       closeNav();
       navToggle.focus();
     }
@@ -30,7 +32,10 @@ if (navToggle && mainNav) {
     if (!mainNav.contains(event.target) && !navToggle.contains(event.target)) closeNav();
   });
 
-  window.addEventListener('resize', function () {
-    if (window.innerWidth > 860) closeNav();
+  document.addEventListener('focusin', function (event) {
+    if (!mainNav.contains(event.target) && event.target !== navToggle) closeNav();
+  });
+  mainNav.querySelectorAll('a').forEach(link => {
+    if (new URL(link.href).pathname === window.location.pathname) link.setAttribute('aria-current', 'page');
   });
 }
