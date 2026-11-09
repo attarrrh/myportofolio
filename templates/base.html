@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/style.css' %}?v=theme-panel-2">
 {% block meta %}{% endblock meta %}
 </head>
 <body>
@@ -24,7 +24,7 @@
         <path d="M12 2a10 10 0 1 0 5.66 18.24c.9-.63.34-2.05-.75-1.94a3.5 3.5 0 0 1-.41-6.98 1.5 1.5 0 0 0 1.36-2.1A10 10 0 0 0 12 2Z"/>
       </svg>
     </button>
-    <div class="theme-panel" id="themePanel" inert>
+    <div class="theme-panel" id="themePanel">
       <button class="swatch" data-theme="cobalt" style="--sw:#1E56F6" title="Cobalt"></button>
       <button class="swatch" data-theme="forest" style="--sw:#1B4332" title="Forest"></button>
       <button class="swatch" data-theme="wine" style="--sw:#3D0B24" title="Wine"></button>
@@ -69,7 +69,7 @@
 
   {% include 'components/toast.html' %}
 
-  <script src="{% static 'js/theme-switcher.js' %}"></script>
+  <script src="{% static 'js/theme-switcher.js' %}?v=theme-panel-2"></script>
   <script src="{% static 'js/nav.js' %}"></script>
   {% block extra_js %}{% endblock extra_js %}
 </body>
