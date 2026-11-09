@@ -35,6 +35,17 @@
 .journal-viewer h2 { font: 500 17px var(--font-heading); margin-top: 16px; }
 .journal-viewer p { margin-top: 8px; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
 body:has(.journal-viewer[open]) { overflow: hidden; }
+.journal-arrange { display: flex; gap: 8px; }
+.journal-arrange button { color: var(--paper); background: none; border: 1px solid var(--line); width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 21px; }
+.journal-wall.is-playground { position: relative; columns: auto; isolation: isolate; }
+.journal-wall.is-playground .gallery-card { position: absolute; margin: 0; padding: 0; transform: rotate(var(--photo-angle, 0deg)); transform-origin: center; transition: transform .18s ease, filter .18s ease; }
+.journal-wall.is-playground .gallery-card.is-dragging { transform: rotate(0deg) scale(1.025); filter: drop-shadow(0 12px 12px rgba(0,0,0,.2)); transition: none; }
+.journal-wall.is-playground button.gallery-media { cursor: grab; }
+.journal-wall.is-playground .is-dragging button.gallery-media { cursor: grabbing; }
+.journal-wall.is-playground .gallery-media img { user-select: none; -webkit-user-drag: none; }
+.journal-drag-handle { position: absolute; top: 7px; left: 7px; z-index: 1; width: 32px; height: 32px; border: 1px solid rgba(255,255,255,.35); border-radius: 50%; background: rgba(0,0,0,.5); color: white; font-size: 18px; cursor: grab; touch-action: none; }
+.journal-drag-handle:active { cursor: grabbing; }
+.journal-wall.is-playground > .empty-state { position: relative; }
 @media (max-width: 860px) {
   .journal-wall { columns: 2; column-gap: 22px; }
   .journal-wall .gallery-card:nth-child(5n + 3) { padding: 0; }
@@ -53,4 +64,4 @@ body:has(.journal-viewer[open]) { overflow: hidden; }
   .journal-wall .gallery-media img, .journal-wall .gallery-media video { min-height: 80px; }
   .journal-viewer { padding-left: 14px; padding-right: 14px; }
 }
-@media (prefers-reduced-motion: reduce) { .journal-wall .gallery-media img { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .journal-wall .gallery-media img, .journal-wall.is-playground .gallery-card { transition: none; } }

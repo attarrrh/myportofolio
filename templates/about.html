@@ -3,7 +3,7 @@
 {% block meta %}
     <title>About Me - {{ name }}</title>
     <link rel="stylesheet" href="{% static 'css/work-pages.css' %}?v=2">
-    <link rel="stylesheet" href="{% static 'css/photo-journal.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/photo-journal.css' %}?v=2">
 {% endblock meta %}
 {% block content %}
   <main>
@@ -17,6 +17,10 @@
           <button type="button" data-media-filter="all" aria-pressed="true">Semua</button>
           <button type="button" data-media-filter="photo" aria-pressed="false">Foto</button>
           <button type="button" data-media-filter="video" aria-pressed="false">Video</button>
+        </div>
+        <div class="journal-arrange" role="group" aria-label="Susunan foto">
+          <button type="button" id="journal-shuffle" aria-label="Acak susunan foto" title="Acak">⤨</button>
+          <button type="button" id="journal-reset" aria-label="Rapikan susunan foto" title="Rapikan">↺</button>
         </div>
       <form method="get" action="{% url 'main:show_about' %}" class="work-search journal-search" data-live-search data-debounce-ms="300">
           <input type="search" name="title" value="{{ title_query }}" placeholder="Cari momen" class="list-search__input" aria-label="Cari momen" autocomplete="off">
@@ -55,5 +59,5 @@
 
 {% block extra_js %}
   <script src="{% static 'js/ajax-list.js' %}?v=photo-journal-1"></script>
-  <script src="{% static 'js/photo-journal.js' %}?v=1"></script>
+  <script src="{% static 'js/photo-journal.js' %}?v=2"></script>
 {% endblock extra_js %}
