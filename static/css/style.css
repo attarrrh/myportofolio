@@ -100,8 +100,10 @@ a{ color:inherit; text-decoration:none; }
    THEME SWITCHER
    ========================================================== */
 .theme-widget{
-  position:fixed; right:22px; bottom:22px; z-index:50;
-  display:flex; flex-direction:column; align-items:flex-end; gap:10px;
+  position:fixed;
+  right:max(22px, env(safe-area-inset-right));
+  bottom:max(22px, env(safe-area-inset-bottom));
+  width:46px; height:46px; z-index:50;
 }
 .theme-toggle-btn{
   width:46px; height:46px; border-radius:50%;
@@ -111,14 +113,17 @@ a{ color:inherit; text-decoration:none; }
   cursor:pointer; box-shadow: 0 6px 18px rgba(0,0,0,.25);
 }
 .theme-panel{
+  position:absolute; right:0; bottom:calc(100% + 12px);
   display:flex; flex-direction:column; gap:8px;
   padding:10px; border-radius:20px;
   background: var(--paper);
   border:1px solid var(--line);
-  opacity:0; transform: translateY(8px) scale(.96); pointer-events:none;
-  transition: opacity .2s ease, transform .2s ease;
+  opacity:0; visibility:hidden;
+  transform: translateY(12px) scale(.96); transform-origin:bottom right;
+  pointer-events:none;
+  transition: opacity .2s ease, transform .2s ease, visibility .2s;
 }
-.theme-panel.is-open{ opacity:1; transform: translateY(0) scale(1); pointer-events:auto; }
+.theme-panel.is-open{ opacity:1; visibility:visible; transform: translateY(0) scale(1); pointer-events:auto; }
 .swatch{
   width:26px; height:26px; border-radius:50%;
   background: var(--sw); border:2px solid rgba(0,0,0,.15); cursor:pointer;

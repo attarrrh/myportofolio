@@ -9,8 +9,14 @@ const widget = document.getElementById('themeWidget');
 const savedTheme = localStorage.getItem('portfolio-theme') || 'clay';
 body.setAttribute('data-theme', savedTheme);
 
+function setThemePanelOpen(open) {
+    panel.classList.toggle('is-open', open);
+    panel.inert = !open;
+    toggleBtn.setAttribute('aria-expanded', String(open));
+}
+
 toggleBtn.addEventListener('click', () => {
-    panel.classList.toggle('is-open');
+    setThemePanelOpen(!panel.classList.contains('is-open'));
 });
 
 swatches.forEach((btn) => {
@@ -24,6 +30,13 @@ swatches.forEach((btn) => {
 // Tutup panel kalau klik di luar widget
 document.addEventListener('click', (e) => {
     if (!widget.contains(e.target)) {
-        panel.classList.remove('is-open');
+        setThemePanelOpen(false);
+    }
+});
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && panel.classList.contains('is-open')) {
+        setThemePanelOpen(false);
+        toggleBtn.focus();
     }
 });

@@ -17,14 +17,14 @@
 
   <!-- ============ TOMBOL GANTI TEMA ============ -->
   <div class="theme-widget" id="themeWidget">
-    <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Ganti warna tema" title="Ganti warna tema">
+    <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Ganti warna tema" title="Ganti warna tema" aria-controls="themePanel" aria-expanded="false">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8">
         <circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/>
         <circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/>
         <path d="M12 2a10 10 0 1 0 5.66 18.24c.9-.63.34-2.05-.75-1.94a3.5 3.5 0 0 1-.41-6.98 1.5 1.5 0 0 0 1.36-2.1A10 10 0 0 0 12 2Z"/>
       </svg>
     </button>
-    <div class="theme-panel" id="themePanel">
+    <div class="theme-panel" id="themePanel" inert>
       <button class="swatch" data-theme="cobalt" style="--sw:#1E56F6" title="Cobalt"></button>
       <button class="swatch" data-theme="forest" style="--sw:#1B4332" title="Forest"></button>
       <button class="swatch" data-theme="wine" style="--sw:#3D0B24" title="Wine"></button>
