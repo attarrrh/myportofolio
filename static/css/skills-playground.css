@@ -1,0 +1,73 @@
+.skill-playground { padding-bottom: 64px; }
+.skill-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; margin-bottom: 30px; }
+.skill-eyebrow { font-size: 10px; letter-spacing: .1em; font-weight: 600; opacity: .65; }
+.skill-heading .section-title { font-weight: 400; font-size: clamp(60px, 8vw, 100px); line-height: 1.1; margin: 12px 0 0; }
+.skill-heading .section-title span { display: inline-block; font-family: var(--font-body); font-size: .6em; margin-left: 20px; color: var(--accent); }
+.skill-intro { font-size: 15px; line-height: 1.7; opacity: .75; }
+.skill-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 18px; border-top: 1px solid var(--line); padding: 18px 0; }
+.skill-filters, .skill-game-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.skill-controls button { font: inherit; font-size: 12px; color: var(--paper); cursor: pointer; }
+.skill-filters button { background: transparent; border: 1px solid transparent; border-radius: 24px; padding: 8px 14px; }
+.skill-filters button span { font-size: 9px; margin-left: 5px; opacity: .6; }
+.skill-filters button[aria-pressed="true"] { border-color: var(--paper); }
+.skill-filters button:hover { background: var(--line); }
+.skill-game-actions { gap: 22px; }
+.skill-game-actions button { border: 0; padding: 8px 0; background: transparent; }
+.skill-game-actions button span { margin-left: 7px; font-size: 17px; }
+.skill-workspace { display: grid; grid-template-columns: minmax(0, 1.85fr) minmax(250px, 1fr); border: 1px solid var(--line); }
+.skill-stage { position: relative; min-width: 0; min-height: 390px; display: flex; align-content: center; align-items: center; flex-wrap: wrap; gap: 14px; padding: 24px; overflow: hidden; background-color: color-mix(in srgb, var(--paper) 4%, var(--bg)); background-image: radial-gradient(var(--line) 1px, transparent 1px); background-size: 22px 22px; }
+.skill-stage.is-ready { display: block; padding: 0; }
+.skill-chip { display: inline-flex; align-items: center; gap: 10px; max-width: calc(100% - 24px); padding: 14px 17px; border: 1px solid var(--paper); border-radius: 6px; background: var(--paper); color: var(--bg); font: inherit; font-size: 13px; font-weight: 600; line-height: 1.2; text-align: left; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.skill-stage.is-ready .skill-chip { position: absolute; top: 0; left: 0; will-change: transform; }
+.skill-chip[hidden] { display: none; }
+.skill-chip[data-category="code"] { background: var(--accent); color: var(--ink); border-color: var(--accent); }
+.skill-chip[data-category="people"] { background: var(--bg); color: var(--paper); }
+.skill-chip-icon { display: grid; place-items: center; min-width: 26px; height: 26px; padding: 0 3px; border: 1px solid currentColor; border-radius: 3px; font-size: 10px; font-weight: 700; font-family: ui-monospace, Consolas, monospace; opacity: .75; }
+.skill-chip-name { overflow-wrap: anywhere; }
+.skill-chip[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--paper); }
+.skill-chip.is-dragging { cursor: grabbing; z-index: 3; box-shadow: 0 8px 20px rgba(0,0,0,.15); }
+.skill-playground button:focus-visible, .skill-project-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+.skill-chip:focus-visible { outline-color: var(--paper); }
+.skill-inspector { min-width: 0; padding: 36px 30px; border-left: 1px solid var(--line); display: flex; flex-direction: column; }
+.skill-inspector h3 { font-family: var(--font-display); font-size: clamp(36px, 4vw, 58px); font-weight: 400; line-height: 1.1; margin: 20px 0 16px; overflow-wrap: anywhere; }
+#skill-description { font-size: 13px; line-height: 1.8; opacity: .75; min-height: 70px; }
+.skill-level-label { display: flex; justify-content: space-between; gap: 10px; margin-top: 24px; margin-bottom: 8px; font-size: 10px; opacity: .7; }
+.skill-level { height: 3px; background: var(--line); }
+.skill-level span { display: block; height: 100%; background: var(--accent); transition: width .3s ease; }
+.skill-inspector-note { font-size: 10px; opacity: .55; margin-top: 10px; }
+.skill-project-link { display: flex; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 32px; font-size: 12px; }
+.skill-project-link:hover { color: var(--accent); }
+.skill-caption { display: flex; justify-content: space-between; gap: 30px; padding-top: 14px; font-size: 10px; line-height: 1.8; opacity: .65; }
+.skill-caption p { max-width: 72ch; }
+.skill-caption > span { white-space: nowrap; letter-spacing: .1em; }
+.skill-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (max-width: 760px) {
+  .skill-workspace { grid-template-columns: minmax(0, 1fr); }
+  .skill-inspector { border-left: 0; border-top: 1px solid var(--line); padding: 28px; }
+  .skill-inspector h3 { font-size: 42px; margin-top: 12px; }
+  #skill-description { min-height: 0; max-width: 52ch; }
+  .skill-stage { min-height: 450px; }
+  .skill-caption > span { display: none; }
+}
+@media (max-width: 440px) {
+  /* Keep the existing profile metadata within narrow mobile screens too. */
+  .hero .meta-list { flex-wrap: wrap; width: 100%; gap: 18px; }
+  .skill-heading { align-items: flex-start; gap: 16px; }
+  .skill-heading .section-title { font-size: clamp(52px, 16vw, 64px); white-space: nowrap; }
+  .skill-heading .section-title span { margin-left: 12px; }
+  .skill-eyebrow { font-size: 8px; }
+  .skill-intro { font-size: 12px; padding-top: 27px; flex-shrink: 0; }
+  .skill-filters { gap: 2px; }
+  .skill-filters button { padding: 9px 7px; font-size: 11px; }
+  .skill-filters button span { margin-left: 2px; }
+  .skill-controls { gap: 8px; }
+  .skill-game-actions { width: 100%; justify-content: flex-end; }
+  .skill-chip { padding: 12px; font-size: 11px; gap: 8px; }
+  .skill-chip-icon { min-width: 23px; height: 23px; font-size: 9px; }
+  .skill-stage { min-height: 490px; }
+  .skill-inspector { padding: 24px; }
+}
+@media (max-width: 360px) {
+  .skill-heading { flex-direction: column; gap: 8px; }
+  .skill-intro { padding-top: 0; }
+}

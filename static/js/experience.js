@@ -11,13 +11,13 @@ function getExperienceFields(experience) {
 function buildExperienceCardElement(experience) {
   const record = getExperienceFields(experience);
   const item = document.createElement('li');
-  item.className = 'timeline-item';
+  item.className = 'timeline-item experience-entry';
 
   const date = document.createElement('div');
   date.className = 'timeline-date';
-  const started = record.started || 'Unknown';
+  const started = record.started || '';
   const ended = record.is_ongoing ? 'Present' : (record.ended || 'Present');
-  date.textContent = `${started} — ${ended}`;
+  date.textContent = started ? started + ' \u2014 ' + ended : (record.is_ongoing ? 'Saat ini' : ended);
 
   const body = document.createElement('div');
   body.className = 'timeline-body';
@@ -32,24 +32,31 @@ function buildExperienceCardElement(experience) {
   title.className = 'exp-title';
   title.textContent = record.title || 'Judul tidak tersedia';
 
+  const meta = document.createElement('div');
+  meta.className = 'experience-meta';
   const category = document.createElement('span');
-  category.textContent = record.category_display || 'Uncategorized';
-
-  title.appendChild(category);
-  summary.appendChild(title);
+  category.className = 'experience-category';
+  category.textContent = record.category_display || 'Experience';
+  const state = document.createElement('span');
+  state.className = record.is_ongoing ? 'experience-status is-current' : 'experience-status';
+  state.textContent = record.is_ongoing ? 'Berlangsung' : 'Selesai';
+  meta.append(category, state);
+  const preview = document.createElement('p');
+  preview.className = 'experience-preview';
+  preview.textContent = record.description || '';
+  const indicator = document.createElement('span');
+  indicator.className = 'experience-expand';
+  indicator.setAttribute('aria-hidden', 'true');
+  indicator.textContent = '+';
+  summary.append(meta, title, preview, indicator);
   details.appendChild(summary);
 
   const content = document.createElement('div');
   content.className = 'exp-content';
 
-  const status = document.createElement('p');
-  status.className = 'timeline-loc';
-  status.textContent = record.is_ongoing ? 'Sedang berlangsung' : 'Selesai';
-
   const description = document.createElement('p');
   description.textContent = record.description || '';
 
-  content.appendChild(status);
   content.appendChild(description);
 
   const media = Array.isArray(record.media) ? record.media : [];

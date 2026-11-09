@@ -1,23 +1,30 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}Projects — Attar{% endblock %}
+{% block meta %}<link rel="stylesheet" href="{% static 'css/work-pages.css' %}?v=1">{% endblock %}
 {% block content %}
-<main><section class="experience experience-page"><div class="wrap">
-  <div class="list-header"><h1 class="section-title">PROJECTS</h1>
-    {% if user.is_superuser %}<button class="button" type="button" popovertarget="project-modal">Tambah Project</button>{% endif %}
+<main class="work-page work-page--projects"><section class="wrap work-layout" aria-label="Projects">
+  {% include 'components/work_page_header.html' with heading='PROJECTS' page_number='02' page_kind='projects' description='Ide yang dicoba. Hal yang dibangun. Proses yang terus berjalan.' %}
+  <div class="work-toolbar">
+    <p class="work-index-label"><span class="work-status-dot" aria-hidden="true"></span> THE WORK</p>
+    <form id="project-search" class="work-search" method="get" role="search">
+      <label for="project-search-input" class="work-sr-only">Cari project berdasarkan judul</label>
+      <input id="project-search-input" class="list-search__input" type="search" name="title" value="{{ title_query }}" placeholder="Cari project…" autocomplete="off">
+      <button type="submit" aria-label="Cari project">Cari <span aria-hidden="true">↗</span></button>
+    </form>
+    {% if user.is_superuser %}<button class="button work-add" type="button" popovertarget="project-modal"><span aria-hidden="true">+</span> Tambah Project</button>{% endif %}
   </div>
-  <p class="section-sub">Aplikasi dan proyek yang saya kerjakan.</p>
-  <form id="project-search" class="list-search" method="get">
-    <input class="list-search__input" type="search" name="title" value="{{ title_query }}" placeholder="Cari berdasarkan judul" aria-label="Cari project">
-    <button class="button" type="submit">Cari</button>
-  </form>
-  <div id="projects-list" class="gallery-grid" aria-live="polite" aria-busy="true"
+  <div id="projects-list" class="project-index" aria-live="polite" aria-busy="true"
        data-api-url="{% url 'api:project-list' %}" data-owner="{{ user.is_superuser|yesno:'true,false' }}"
        data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}" data-login-url="{% url 'main:login' %}">
     <p class="empty-state" role="status">Memuat projects...</p>
   </div>
+  <a class="work-next" href="mailto:attarrrh@gmail.com">
+    <span><small>PUNYA IDE UNTUK DIKERJAKAN BERSAMA?</small><strong>Let's talk.</strong></span>
+    <span class="work-next-arrow" aria-hidden="true">↗</span>
+  </a>
   <div hidden>{% csrf_token %}</div>
-</div></section></main>
+</section></main>
 {% if user.is_superuser %}
 <div class="exp-modal" id="project-modal" popover="auto" role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
   <div class="exp-modal__content">
@@ -34,5 +41,5 @@
 {% endblock %}
 {% block extra_js %}
 <script src="{% static 'js/ajax-list.js' %}?v=field-errors"></script>
-<script src="{% static 'js/projects.js' %}?v=field-errors"></script>
+<script src="{% static 'js/projects.js' %}?v=work-pages-1"></script>
 {% endblock %}

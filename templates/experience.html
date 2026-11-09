@@ -1,42 +1,38 @@
 {% extends "base.html" %}
 {% load static %}
 {% block meta %}
-    <title>Experience - {{ name }}</title>
+  <link rel="stylesheet" href="{% static 'css/work-pages.css' %}?v=1">
 {% endblock meta %}
+{% block title %}Experience — {{ name }}{% endblock title %}
 {% block content %}
-  <main>
-
-  <!-- ============ EXPERIENCE (dari database, via JSON) ============ -->
-
-  <section id="experience" class="experience experience-page">
-    <div class="wrap">
-      <div class="list-header">
-        <h1 class="section-title">EXPERIENCE</h1>
+  <main class="work-page work-page--experience">
+  <section id="experience" class="wrap work-layout" aria-label="Experience">
+      {% include 'components/work_page_header.html' with heading='EXPERIENCE' page_number='01' page_kind='experience' description='Pengalaman, kegiatan, dan ruang untuk terus belajar.' %}
+      <div class="work-toolbar">
+        <p class="work-index-label"><span class="work-status-dot" aria-hidden="true"></span> THE JOURNEY</p>
+        <form method="get" action="{% url 'main:show_experience' %}"
+          class="work-search" data-live-search data-debounce-ms="300" role="search">
+          <label for="experience-search" class="work-sr-only">Cari pengalaman berdasarkan judul</label>
+          <input id="experience-search" type="search" name="title" value="{{ title_query }}"
+            placeholder="Cari pengalaman…" autocomplete="off" class="list-search__input">
+          <button type="submit" aria-label="Cari pengalaman">Cari <span aria-hidden="true">↗</span></button>
+        </form>
         {% if user.is_superuser %}
-        <button type="button" class="button list-add-button"
+        <button type="button" class="button work-add"
           popovertarget="add-experience-modal" popovertargetaction="show">
             <span aria-hidden="true">+</span> Tambah Experience
         </button>
         {% endif %}
       </div>
-      <p class="section-sub">Activities, organizations, and jobs I have been involved in</p>
-      <form method="get" action="{% url 'main:show_experience' %}"
-        class="list-search" data-live-search data-debounce-ms="300">
-          <input type="search"
-                 name="title"
-                 value="{{ title_query }}"
-                 placeholder="Cari berdasarkan judul"
-                 class="list-search__input"
-                 aria-label="Cari berdasarkan judul">
-          <button type="submit" class="button">Cari</button>
-      </form>
-
-        <ol class="timeline" id="experience-list"
+        <ol class="experience-index" id="experience-list"
             aria-live="polite" aria-busy="true" data-can-delete="{{ user.is_superuser|yesno:'true,false' }}" data-list-kind="experience" data-api-url="{% url 'api:experience-list' %}"
             data-can-manage="{{ can_edit|yesno:"true,false" }}">
         <li class="empty-state" role="status">Memuat data experience...</li>
       </ol>
-    </div>
+      <a class="work-next" href="{% url 'main:show_projects' %}">
+        <span><small>LANJUT JELAJAHI</small><strong>See the projects.</strong></span>
+        <span class="work-next-arrow" aria-hidden="true">↗</span>
+      </a>
   </section>
 
   {% if user.is_superuser %}
@@ -48,6 +44,6 @@
 {% endblock content %}
 
 {% block extra_js %}
-  <script src="{% static 'js/experience.js' %}?v=tutorial7"></script>
+  <script src="{% static 'js/experience.js' %}?v=work-pages-1"></script>
   <script src="{% static 'js/ajax-list.js' %}?v=field-errors"></script>
 {% endblock extra_js %}

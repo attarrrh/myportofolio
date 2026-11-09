@@ -8,24 +8,38 @@
   const records = new Map();
   let controller, timer, editing = null;
 
-  function card(record) {
-    const item = listElement('article', 'gallery-card');
+  function card(record, index) {
+    const item = listElement('article', 'project-entry');
+    const number = String(index + 1).padStart(2, '0');
+    const media = listElement('div', 'project-visual');
     const imageURL = record.project_image_url && safeMediaUrl(record.project_image_url);
     if (imageURL) {
-      const media = listElement('div', 'gallery-media');
       const image = document.createElement('img');
       image.src = imageURL; image.alt = record.title; image.loading = 'lazy';
-      media.append(image); item.append(media);
+      image.addEventListener('error', () => {
+        image.remove();
+        media.classList.add('project-visual--type');
+      });
+      media.append(image);
+    } else {
+      media.classList.add('project-visual--type');
     }
-    const info = listElement('div', 'gallery-info');
-    info.append(listElement('h2', '', record.title), listElement('p', '', record.description),
-      listElement('p', 'gallery-category', record.tech_stack));
+    const specimen = listElement('div', 'project-specimen');
+    specimen.setAttribute('aria-hidden', 'true');
+    specimen.append(listElement('span', 'project-specimen-label', 'PROJECT / ' + number),
+      listElement('span', 'project-specimen-title', record.title),
+      listElement('span', 'project-specimen-stack', record.tech_stack));
+    media.append(specimen);
+    const info = listElement('div', 'project-info');
+    const meta = listElement('div', 'project-meta');
+    meta.append(listElement('span', '', 'PROJECT ' + number), listElement('span', '', record.tech_stack));
+    info.append(meta, listElement('h2', 'project-title', record.title), listElement('p', 'project-description', record.description));
     const url = record.project_url && safeMediaUrl(record.project_url);
     if (url) {
-      const link = listElement('a', 'button button-secondary', 'Lihat project');
+      const link = listElement('a', 'project-visit', 'Lihat project ↗');
       link.href = url; link.target = '_blank'; link.rel = 'noopener noreferrer'; info.append(link);
     }
-    const actions = listElement('div', 'item-actions');
+    const actions = listElement('div', 'item-actions project-actions');
     if (list.dataset.authenticated === 'true') {
       const star = listElement('button', 'button button-like', `★ ${record.is_starred ? 'Batal Star' : 'Star'} (${record.star_count})`);
       star.type = 'button'; star.dataset.action = 'star'; star.dataset.id = record.id;
@@ -34,7 +48,7 @@
       const login = listElement('a', 'button button-like', `Login untuk star (${record.star_count})`);
       login.href = list.dataset.loginUrl; actions.append(login);
     }
-    if (record.starred_by_names) info.append(listElement('small', '', `Star oleh: ${record.starred_by_names}`));
+    if (record.starred_by_names) info.append(listElement('small', 'project-supporters', `Star oleh: ${record.starred_by_names}`));
     if (list.dataset.owner === 'true') {
       for (const [action, label] of [['edit', 'Edit'], ['delete', 'Hapus']]) {
         const button = listElement('button', 'button button-secondary', label);
@@ -42,7 +56,7 @@
         actions.append(button);
       }
     }
-    info.append(actions); item.append(info); return item;
+    info.append(actions); item.append(media, info); return item;
   }
 
   async function refresh() {
@@ -58,8 +72,14 @@
       const projects = await response.json();
       if (current.signal.aborted) return;
       records.clear(); list.replaceChildren();
-      for (const project of projects) { records.set(project.id, project); list.append(card(project)); }
-      if (!projects.length) list.append(listElement('p', 'empty-state', 'Tidak ada project yang sesuai.'));
+      projects.forEach((project, index) => { records.set(project.id, project); list.append(card(project, index)); });
+      if (!projects.length) {
+        const empty = listElement('div', 'empty-state work-empty');
+        empty.append(listElement('span', 'work-empty-mark', '↗'),
+          listElement('h2', '', input.value.trim() ? 'Tidak ada project yang sesuai.' : 'Ruang untuk ide berikutnya.'),
+          listElement('p', '', input.value.trim() ? 'Coba judul atau kata kunci lainnya.' : 'Belum ada project yang dipublikasikan. Kembali lagi untuk melihat perkembangannya.'));
+        list.append(empty);
+      }
     } catch (error) {
       if (current.signal.aborted) return;
       list.replaceChildren(listElement('p', 'empty-state', 'Gagal memuat projects. Coba cari kembali.'));

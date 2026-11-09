@@ -106,6 +106,62 @@ class Tutorial7BrowserTest(StaticLiveServerTestCase):
                 browser.close()
         self.assertEqual(errors, [])
 
+    def test_skill_playground_filter_selection_drag_keyboard_and_reduced_motion(self):
+        from playwright.sync_api import expect, sync_playwright
+
+        with sync_playwright() as automation:
+            browser = automation.chromium.launch(channel="chrome", headless=True)
+            for width, reduced in ((1440, False), (390, True), (320, True)):
+                context = browser.new_context(viewport={"width": width, "height": 900}, has_touch=True,
+                    reduced_motion="reduce" if reduced else "no-preference")
+                context.route("https://**/*", lambda route: route.abort())
+                page = context.new_page()
+                errors = []
+                page.on("pageerror", lambda error: errors.append(str(error)))
+                page.goto(self.live_server_url + "/")
+                stage = page.locator("#skill-stage")
+                stage.scroll_into_view_if_needed()
+                expect(page.locator(".skill-chip:visible")).to_have_count(11)
+                self.assertFalse(page.evaluate("document.documentElement.scrollWidth > innerWidth"))
+                page.locator('[data-skill-filter="code"]').click()
+                expect(page.locator(".skill-chip:visible")).to_have_count(4)
+                java = stage.get_by_role("button", name="Java", exact=True)
+                java.tap()
+                expect(page.locator("#skill-name")).to_have_text("Java")
+                expect(page.locator("#skill-level")).to_have_attribute("aria-valuenow", "80")
+                expect(java).to_have_attribute("aria-pressed", "true")
+                before = java.bounding_box()
+                java.focus()
+                page.keyboard.press("ArrowRight")
+                self.assertGreater(java.bounding_box()["x"], before["x"])
+                page.locator('[data-skill-filter="tools"]').click()
+                expect(page.locator(".skill-chip:visible")).to_have_count(4)
+                expect(page.locator("#skill-category")).to_have_text("DATA & TOOLS")
+                page.locator("#skill-reset").click()
+                expect(page.locator(".skill-chip:visible")).to_have_count(11)
+                expect(page.locator("#skill-name")).to_have_text("Python")
+                python = stage.get_by_role("button", name="Python", exact=True)
+                initial = python.bounding_box()
+                page.mouse.move(initial["x"] + initial["width"] / 2, initial["y"] + initial["height"] / 2)
+                page.mouse.down()
+                page.mouse.move(initial["x"] + initial["width"] / 2 + 45, initial["y"] + initial["height"] / 2 + 35, steps=10)
+                page.mouse.up()
+                self.assertNotEqual(python.bounding_box(), initial)
+                page.locator("#skill-shuffle").click()
+                page.wait_for_timeout(250)
+                bounds = stage.bounding_box()
+                for chip in page.locator(".skill-chip:visible").all():
+                    rect = chip.bounding_box()
+                    self.assertGreaterEqual(rect["x"], bounds["x"] - 1)
+                    self.assertGreaterEqual(rect["y"], bounds["y"] - 1)
+                    self.assertLessEqual(rect["x"] + rect["width"], bounds["x"] + bounds["width"] + 1)
+                    self.assertLessEqual(rect["y"] + rect["height"], bounds["y"] + bounds["height"] + 1)
+                page.locator("#skill-reset").click()
+                expect(page.locator('[data-skill-filter="all"]')).to_have_attribute("aria-pressed", "true")
+                self.assertEqual(errors, [])
+                context.close()
+            browser.close()
+
     def test_assignment6_gallery_edit_star_errors_and_delete_without_reload(self):
         from playwright.sync_api import expect, sync_playwright
 

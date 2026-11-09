@@ -1,0 +1,17 @@
+<header class="work-intro">
+  <div class="work-eyebrow">
+    <span>ATTAR RAIS HAKAM / PORTFOLIO</span>
+    <span>{{ page_number }} / 02</span>
+  </div>
+  <div class="work-title-row">
+    <h1 class="work-title">{{ heading }}<span class="work-title-dot">.</span></h1>
+    <span class="work-heading-arrow" aria-hidden="true">↙</span>
+  </div>
+  <div class="work-intro-bottom">
+    <p class="work-description">{{ description }}</p>
+    <nav class="work-switcher" aria-label="Jelajahi portofolio">
+      <a href="{% url 'main:show_experience' %}"{% if page_kind == 'experience' %} aria-current="page"{% endif %}>Experience <span>01</span></a>
+      <a href="{% url 'main:show_projects' %}"{% if page_kind == 'projects' %} aria-current="page"{% endif %}>Projects <span>02</span></a>
+    </nav>
+  </div>
+</header>
